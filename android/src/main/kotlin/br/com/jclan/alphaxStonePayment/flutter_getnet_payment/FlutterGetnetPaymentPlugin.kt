@@ -12,10 +12,12 @@ import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
 import br.com.jclan.alphaxStonePayment.flutter_getnet_payment.deeplink.Deeplink
+import br.com.jclan.alphaxStonePayment.flutter_getnet_payment.deeplink.PaymentDeeplink
 import com.getnet.posdigital.PosDigital
 
 class FlutterGetnetPaymentPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
   private lateinit var channel : MethodChannel
+  private val paymentDeeplink = PaymentDeeplink()
   private var binding: ActivityPluginBinding? = null
   private var resultScope: Result? = null
 
@@ -28,8 +30,11 @@ class FlutterGetnetPaymentPlugin: FlutterPlugin, MethodCallHandler, ActivityAwar
   override fun onAttachedToActivity(newBinding: ActivityPluginBinding) {
     binding = newBinding
     PosDigital.register(binding!!.activity, bindCallback)
-    binding?.addActivityResultListener { requestCode: Int, resultCode: Int, data: Intent? ->
-      println("$requestCode, $resultCode, $data")
+    binding?.addActivityResultListener { requestCode: Int, resultCode: Int, intent: Intent? ->
+      println("$requestCode, $resultCode, $intent")
+      if(resultCode == PaymentDeeplink.REQUEST_CODE) {
+        paymentDeeplink.validateIntent(intent)
+      }
       true
     }
   }
@@ -73,15 +78,14 @@ class FlutterGetnetPaymentPlugin: FlutterPlugin, MethodCallHandler, ActivityAwar
 
     when (call.method) {
       "pay" -> {
-//        val bundle = Bundle().apply {
-//          putString("amount", call.argument<String>("amount"))
-//          putString("transaction_type", call.argument<String>("transaction_type"))
-//          putString("installment_type", call.argument<String>("installment_type"))
-//          putString("installment_count", call.argument<String>("installment_count"))
-//          putString("order_id", call.argument<String>("order_id"))
-//          putBoolean("editable_amount", call.argument<Boolean?>("editable_amount") ?: false)
-//        }
-//        starDeeplink(paymentDeeplink, bundle)
+        val bundle = Bundle().apply {
+          putString("amount", call.argument<String>("amount"))
+          putString("paymentType", call.argument<String>("paymentType"))
+          putString("callerId", call.argument<String>("callerId"))
+          putString("creditType", call.argument<String>("creditType"))
+          putString("installments", call.argument<String>("installments"))
+        }
+        starDeeplink(paymentDeeplink, bundle)
       }
       "cancel" -> {
 //        val bundle = Bundle().apply {
