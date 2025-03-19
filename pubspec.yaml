@@ -35,7 +35,7 @@ flutter:
   plugin:
     platforms:
       android:
-        package: br.com.jclan.alphaxStonePayment.flutter_getnet_payment
+        package: br.com.jclan.alphaxGetnetPayment.flutter_getnet_payment
         pluginClass: FlutterGetnetPaymentPlugin
 
   # To add assets to your plugin package, add an assets section, like this:

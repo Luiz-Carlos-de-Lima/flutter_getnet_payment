@@ -1,4 +1,4 @@
-package br.com.jclan.alphaxStonePayment.flutter_getnet_payment.deeplink
+package br.com.jclan.alphaxGetnetPayment.flutter_getnet_payment.deeplink
 
 import android.content.Intent
 import android.net.Uri

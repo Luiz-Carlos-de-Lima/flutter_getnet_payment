@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 import 'flutter_getnet_payment_platform_interface.dart';
+import 'models/payment_payload.dart';
 
 /// An implementation of [FlutterGetnetPaymentPlatform] that uses method channels.
 class MethodChannelFlutterGetnetPayment extends FlutterGetnetPaymentPlatform {
@@ -10,8 +11,7 @@ class MethodChannelFlutterGetnetPayment extends FlutterGetnetPaymentPlatform {
   final methodChannel = const MethodChannel('flutter_getnet_payment');
 
   @override
-  Future<String?> getPlatformVersion() async {
-    final version = await methodChannel.invokeMethod<String>('getPlatformVersion');
-    return version;
+  Future<void> pay({required PaymentPayload paymentPayload}) async {
+    await methodChannel.invokeMethod<String>('pay', paymentPayload.toMap());
   }
 }

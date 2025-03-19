@@ -1,4 +1,4 @@
-package br.com.jclan.alphaxStonePayment.flutter_getnet_payment
+package br.com.jclan.alphaxGetnetPayment.flutter_getnet_payment
 
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
