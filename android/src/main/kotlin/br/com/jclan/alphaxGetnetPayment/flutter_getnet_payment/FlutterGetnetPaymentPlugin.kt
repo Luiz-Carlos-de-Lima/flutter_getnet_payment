@@ -13,6 +13,7 @@ import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
 import br.com.jclan.alphaxGetnetPayment.flutter_getnet_payment.deeplink.Deeplink
 import br.com.jclan.alphaxGetnetPayment.flutter_getnet_payment.deeplink.PaymentDeeplink
+import br.com.jclan.alphaxGetnetPayment.flutter_getnet_payment.deeplink.RefundDeeplink
 import br.com.jclan.alphaxGetnetPayment.flutter_getnet_payment.deeplink.StatusDeeplink
 import com.getnet.posdigital.PosDigital
 
@@ -20,6 +21,7 @@ class FlutterGetnetPaymentPlugin: FlutterPlugin, MethodCallHandler, ActivityAwar
   private lateinit var channel : MethodChannel
   private val paymentDeeplink = PaymentDeeplink()
   private val statusDeeplink = StatusDeeplink()
+  private val refundDeeplink = RefundDeeplink()
   private var binding: ActivityPluginBinding? = null
   private var resultScope: Result? = null
 
@@ -35,10 +37,16 @@ class FlutterGetnetPaymentPlugin: FlutterPlugin, MethodCallHandler, ActivityAwar
     binding?.addActivityResultListener { requestCode: Int, resultCode: Int, intent: Intent? ->
       if(Activity.RESULT_OK == resultCode) {
         var responseMap: Map<String, Any?> = mapOf()
-        if (requestCode == PaymentDeeplink.REQUEST_CODE) {
-          responseMap = paymentDeeplink.validateIntent(intent)
-        } else if (requestCode == StatusDeeplink.REQUEST_CODE) {
-          responseMap = statusDeeplink.validateIntent(intent)
+        when (requestCode) {
+            PaymentDeeplink.REQUEST_CODE -> {
+              responseMap = paymentDeeplink.validateIntent(intent)
+            }
+            StatusDeeplink.REQUEST_CODE -> {
+              responseMap = statusDeeplink.validateIntent(intent)
+            }
+            RefundDeeplink.REQUEST_CODE -> {
+              responseMap = refundDeeplink.validateIntent(intent)
+            }
         }
 
         sendResultData(responseMap)
@@ -95,7 +103,7 @@ class FlutterGetnetPaymentPlugin: FlutterPlugin, MethodCallHandler, ActivityAwar
         }
         starDeeplink(paymentDeeplink, bundle)
       }
-      "getStatusPayment" -> {
+      "statusPayment" -> {
         val bundle = Bundle().apply {
           putString("callerId", call.argument<String>("callerId"))
           putBoolean("allowPrintCurrentTransaction", call.argument<Boolean>("allowPrintCurrentTransaction") ?: false)
@@ -103,12 +111,14 @@ class FlutterGetnetPaymentPlugin: FlutterPlugin, MethodCallHandler, ActivityAwar
         starDeeplink(paymentDeeplink, bundle)
       }
       "refund" -> {
-//        val bundle = Bundle().apply {
-//          putString("amount", call.argument<String>("amount"))
-//          putString("atk", call.argument<String>("atk"))
-//          putBoolean("editable_amount", call.argument<Boolean?>("editable_amount") ?: false)
-//        }
-//        starDeeplink(cancelDeeplink, bundle)
+        val bundle = Bundle().apply {
+          putString("amount", call.argument<String>("amount"))
+          putString("transactionDate", call.argument<String>("transactionDate"))
+          putString("cvNumber", call.argument<String>("cvNumber"))
+          putString("originTerminal", call.argument<String>("originTerminal"))
+          putBoolean("allowPrintCurrentTransaction", call.argument<Boolean>("allowPrintCurrentTransaction") ?: false)
+        }
+        starDeeplink(refundDeeplink, bundle)
       }
       "print" -> {
 //        val bundle = Bundle().apply {

@@ -39,9 +39,10 @@ class MethodChannelFlutterGetnetPayment extends FlutterGetnetPaymentPlatform {
     }
   }
 
+  @override
   Future<StatusPaymentResponse> statusPayment({required StatusPaymentPayload statusPaymentPayload}) async {
     try {
-      final response = await methodChannel.invokeMethod<Map>('pay', statusPaymentPayload.toJson());
+      final response = await methodChannel.invokeMethod<Map>('statusPayment', statusPaymentPayload.toJson());
       if (response is Map) {
         if ((response['code'] == StatusDeeplink.SUCCESS.name || response['code'] == StatusDeeplink.PENDING.name) && response['data'] is Map) {
           final jsonData = response['data'];
