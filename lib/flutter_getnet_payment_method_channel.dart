@@ -1,5 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_getnet_payment/constants/status_deeplink.dart';
+import 'package:flutter_getnet_payment/exceptions/payment_exception.dart';
+import 'package:flutter_getnet_payment/models/payment_response.dart';
 
 import 'flutter_getnet_payment_platform_interface.dart';
 import 'models/payment_payload.dart';
@@ -11,7 +14,25 @@ class MethodChannelFlutterGetnetPayment extends FlutterGetnetPaymentPlatform {
   final methodChannel = const MethodChannel('flutter_getnet_payment');
 
   @override
-  Future<void> pay({required PaymentPayload paymentPayload}) async {
-    await methodChannel.invokeMethod<String>('pay', paymentPayload.toMap());
+  Future<PaymentResponse> pay({required PaymentPayload paymentPayload}) async {
+    try {
+      final response = await methodChannel.invokeMethod<Map>('pay', paymentPayload.toJson());
+      if (response is Map) {
+        if (response['code'] == StatusDeeplink.SUCCESS.name && response['data'] is Map) {
+          final jsonData = response['data'];
+          return PaymentResponse.fromJson(jsonData);
+        } else {
+          throw PaymentException(message: response['message']);
+        }
+      } else {
+        throw PaymentException(message: 'invalid response');
+      }
+    } on PaymentException catch (e) {
+      throw PaymentException(message: e.message);
+    } on PlatformException catch (e) {
+      throw PaymentException(message: e.message ?? 'PlatformException');
+    } catch (e) {
+      throw PaymentException(message: "Pay Error: $e");
+    }
   }
 }

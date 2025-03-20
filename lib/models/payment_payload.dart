@@ -10,23 +10,25 @@ class PaymentPayload {
   final String orderId;
 
   PaymentPayload({required this.paymentType, this.creditType, this.installments, required this.amount, required this.callerId, required this.orderId})
-    : assert(paymentType != PaymentType.credit || creditType != null, "creditType and installments cannot be null when paymentType is 'credit'"),
-      assert(creditType != null || installments == null, "installments cannot be null when creditType is 'creditMerchant' or 'creditIssuer'"),
-      assert(callerId.length <= 50, 'callerId size must be les than or equal to 50 characters'),
-      assert(orderId.length <= 50, 'orderId size must be les than or equal to 50 characters');
+    : assert(
+        paymentType != PaymentType.credit || (creditType != null && installments != null && installments > 0),
+        "creditType and installments cannot be null when paymentType is 'credit', and installments must be greater than 0",
+      ),
+      assert(callerId.length <= 50, 'callerId size must be less than or equal to 50 characters'),
+      assert(orderId.length <= 50, 'orderId size must be less than or equal to 50 characters');
 
-  static PaymentPayload fromMap(Map<String, dynamic> map) {
+  static PaymentPayload fromJson(Map map) {
     return PaymentPayload(
       paymentType: PaymentType.values.byName(map['paymentType']),
       creditType: map['creditType'] != null ? CreditType.values.byName(map['creditType']) : null,
-      installments: map['installments'],
-      amount: map['amount'],
+      installments: map['installments'] != null ? (map['installments'] as num).toInt() : null,
+      amount: (map['amount'] as num).toDouble(),
       callerId: map['callerId'],
       orderId: map['orderId'],
     );
   }
 
-  Map<String, dynamic> toMap() {
+  Map<String, dynamic> toJson() {
     return {
       'paymentType': paymentType.name,
       'creditType': creditType?.name,

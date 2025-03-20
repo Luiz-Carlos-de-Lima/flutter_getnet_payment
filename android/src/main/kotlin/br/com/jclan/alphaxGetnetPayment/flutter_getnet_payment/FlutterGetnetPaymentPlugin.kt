@@ -31,9 +31,13 @@ class FlutterGetnetPaymentPlugin: FlutterPlugin, MethodCallHandler, ActivityAwar
     binding = newBinding
     PosDigital.register(binding!!.activity, bindCallback)
     binding?.addActivityResultListener { requestCode: Int, resultCode: Int, intent: Intent? ->
-      println("$requestCode, $resultCode, $intent")
-      if(resultCode == PaymentDeeplink.REQUEST_CODE) {
-        paymentDeeplink.validateIntent(intent)
+      if(Activity.RESULT_OK == resultCode) {
+        var responseMap: Map<String, Any?> = mapOf()
+        if (requestCode == PaymentDeeplink.REQUEST_CODE) {
+          responseMap = paymentDeeplink.validateIntent(intent)
+        }
+
+        sendResultData(responseMap)
       }
       true
     }
@@ -129,6 +133,8 @@ class FlutterGetnetPaymentPlugin: FlutterPlugin, MethodCallHandler, ActivityAwar
   }
 
   private fun sendResultData(paymentData: Map<String, Any?>) {
+
+    Log.d("sendResultData", paymentData.toString())
     if (paymentData["code"] == "SUCCESS" && paymentData["data"] != null) {
       resultScope?.success(paymentData)
       resultScope = null
