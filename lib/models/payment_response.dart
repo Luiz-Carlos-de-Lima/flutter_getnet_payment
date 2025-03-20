@@ -11,11 +11,13 @@ class PaymentResponse {
   final String? brand;
   final String inputType;
   final String? installments;
+  final String? gmtDateTime;
   final String? nsuLocal;
   final String? authorizationCode;
   final String? cardBin;
   final String? cardLastDigits;
   final String? extraScreensResult;
+  final String? splitPayloadResponse;
   final String? cardholderName;
   final String? automationSlip;
   final bool? printMerchantPreference;
@@ -35,11 +37,13 @@ class PaymentResponse {
     this.brand,
     required this.inputType,
     this.installments,
+    this.gmtDateTime,
     this.nsuLocal,
     this.authorizationCode,
     this.cardBin,
     this.cardLastDigits,
     this.extraScreensResult,
+    this.splitPayloadResponse,
     this.cardholderName,
     this.automationSlip,
     this.printMerchantPreference,
@@ -61,11 +65,13 @@ class PaymentResponse {
       brand: map['brand'],
       inputType: map['inputType'],
       installments: map['installments'],
+      gmtDateTime: map['gmtDateTime'],
       nsuLocal: map['nsuLocal'],
       authorizationCode: map['authorizationCode'],
       cardBin: map['cardBin'],
       cardLastDigits: map['cardLastDigits'],
       extraScreensResult: map['extraScreensResult'],
+      splitPayloadResponse: map['splitPayloadResponse'],
       cardholderName: map['cardholderName'],
       automationSlip: map['automationSlip'],
       printMerchantPreference: map['printMerchantPreference'],
@@ -88,11 +94,13 @@ class PaymentResponse {
       'brand': brand,
       'inputType': inputType,
       'installments': installments,
+      'gmtDateTime': gmtDateTime,
       'nsuLocal': nsuLocal,
       'authorizationCode': authorizationCode,
       'cardBin': cardBin,
       'cardLastDigits': cardLastDigits,
       'extraScreensResult': extraScreensResult,
+      'splitPayloadResponse': splitPayloadResponse,
       'cardholderName': cardholderName,
       'automationSlip': automationSlip,
       'printMerchantPreference': printMerchantPreference,

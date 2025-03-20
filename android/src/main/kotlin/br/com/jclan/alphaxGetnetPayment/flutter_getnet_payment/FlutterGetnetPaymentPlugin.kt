@@ -13,11 +13,13 @@ import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
 import br.com.jclan.alphaxGetnetPayment.flutter_getnet_payment.deeplink.Deeplink
 import br.com.jclan.alphaxGetnetPayment.flutter_getnet_payment.deeplink.PaymentDeeplink
+import br.com.jclan.alphaxGetnetPayment.flutter_getnet_payment.deeplink.StatusDeeplink
 import com.getnet.posdigital.PosDigital
 
 class FlutterGetnetPaymentPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
   private lateinit var channel : MethodChannel
   private val paymentDeeplink = PaymentDeeplink()
+  private val statusDeeplink = StatusDeeplink()
   private var binding: ActivityPluginBinding? = null
   private var resultScope: Result? = null
 
@@ -35,6 +37,8 @@ class FlutterGetnetPaymentPlugin: FlutterPlugin, MethodCallHandler, ActivityAwar
         var responseMap: Map<String, Any?> = mapOf()
         if (requestCode == PaymentDeeplink.REQUEST_CODE) {
           responseMap = paymentDeeplink.validateIntent(intent)
+        } else if (requestCode == StatusDeeplink.REQUEST_CODE) {
+          responseMap = statusDeeplink.validateIntent(intent)
         }
 
         sendResultData(responseMap)
@@ -91,7 +95,14 @@ class FlutterGetnetPaymentPlugin: FlutterPlugin, MethodCallHandler, ActivityAwar
         }
         starDeeplink(paymentDeeplink, bundle)
       }
-      "cancel" -> {
+      "getStatusPayment" -> {
+        val bundle = Bundle().apply {
+          putString("callerId", call.argument<String>("callerId"))
+          putBoolean("allowPrintCurrentTransaction", call.argument<Boolean>("allowPrintCurrentTransaction") ?: false)
+        }
+        starDeeplink(paymentDeeplink, bundle)
+      }
+      "refund" -> {
 //        val bundle = Bundle().apply {
 //          putString("amount", call.argument<String>("amount"))
 //          putString("atk", call.argument<String>("atk"))
@@ -133,12 +144,13 @@ class FlutterGetnetPaymentPlugin: FlutterPlugin, MethodCallHandler, ActivityAwar
   }
 
   private fun sendResultData(paymentData: Map<String, Any?>) {
-
-    Log.d("sendResultData", paymentData.toString())
     if (paymentData["code"] == "SUCCESS" && paymentData["data"] != null) {
       resultScope?.success(paymentData)
       resultScope = null
-    } else {
+    } else if (paymentData["code"] == "PENDING" && paymentData["data"] != null) {
+      resultScope?.success(paymentData)
+      resultScope = null
+    } else  {
       val message: String = (paymentData["message"] ?: "result error").toString()
       resultScope?.error((paymentData["code"] ?: "ERROR").toString(), message, null)
       resultScope = null
