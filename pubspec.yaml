@@ -1,11 +1,11 @@
 name: flutter_getnet_payment
-description: "A new Flutter plugin project."
+description: "Plugin flutter que faz a integração com o SDK da getnet, para pagamento com maquininhas POS"
 version: 0.0.1
-homepage:
+homepage: https://github.com/Luiz-Carlos-de-Lima/flutter_getnet_payment
 
 environment:
   sdk: ^3.7.2
-  flutter: '>=3.3.0'
+  flutter: ">=3.3.0"
 
 dependencies:
   flutter:
@@ -35,7 +35,7 @@ flutter:
   plugin:
     platforms:
       android:
-        package: br.com.jclan.alphaxStonePayment.flutter_getnet_payment
+        package: br.com.jclan.alphaxGetnetPayment.flutter_getnet_payment
         pluginClass: FlutterGetnetPaymentPlugin
 
   # To add assets to your plugin package, add an assets section, like this:

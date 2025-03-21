@@ -1,6 +1,9 @@
+import 'package:flutter_getnet_payment/models/status_payment_payload.dart';
+import 'package:flutter_getnet_payment/models/status_payment_response.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
 import 'flutter_getnet_payment_method_channel.dart';
+import 'models/payment_payload.dart';
 
 abstract class FlutterGetnetPaymentPlatform extends PlatformInterface {
   /// Constructs a FlutterGetnetPaymentPlatform.
@@ -23,7 +26,11 @@ abstract class FlutterGetnetPaymentPlatform extends PlatformInterface {
     _instance = instance;
   }
 
-  Future<String?> getPlatformVersion() {
+  Future<void> pay({required PaymentPayload paymentPayload}) {
+    throw UnimplementedError('platformVersion() has not been implemented.');
+  }
+
+  Future<StatusPaymentResponse> statusPayment({required StatusPaymentPayload statusPaymentPayload}) async {
     throw UnimplementedError('platformVersion() has not been implemented.');
   }
 }
