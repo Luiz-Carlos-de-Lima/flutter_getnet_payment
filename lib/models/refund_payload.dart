@@ -1,5 +1,9 @@
+import 'package:intl/intl.dart';
+
 class RefundPayload {
   final double amount;
+
+  /// Data da transação a ser estornada. caso null vai assumir o dia corrente. Enviar no formato: “dd/MM/yyyy”
   final String? transactionDate;
   final String? cvNumber;
   final String? originTerminal;

@@ -2,6 +2,7 @@ package br.com.jclan.alphaxGetnetPayment.flutter_getnet_payment.deeplink
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
 
 abstract class Deeplink {
@@ -17,7 +18,7 @@ abstract class Deeplink {
                     "message" to "no intent data"
                 )
             }
-
+            Log.d("validateIntent", "$intent")
             val extras: Bundle? = intent.extras
 
             when (val status: String? = extras?.getString("result")) {
@@ -47,6 +48,7 @@ abstract class Deeplink {
                 }
                 else -> {
                     var message: String = "Erro não identificado"
+                    val resultDetail: String? = extras?.getString("resultDetails")
 
                     when (status) {
                         "1" -> {
@@ -64,6 +66,10 @@ abstract class Deeplink {
                         "4" -> {
                             message = "Desconhecido"
                         }
+                    }
+
+                    if(resultDetail != null) {
+                        message += "\n$resultDetail"
                     }
 
                     return mapOf(

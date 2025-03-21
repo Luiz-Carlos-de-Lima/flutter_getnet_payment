@@ -5,7 +5,7 @@ import android.net.Uri
 import android.os.Bundle
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
 
-class PreAuthorization: Deeplink() {
+class PreAuthorizationDeeplink: Deeplink() {
     companion object {
         const val REQUEST_CODE = 10003
     }
@@ -46,7 +46,7 @@ class PreAuthorization: Deeplink() {
 
             val paymentIntent = Intent(Intent.ACTION_VIEW)
             paymentIntent.data = uriBuilder.build()
-            binding.activity.startActivityForResult(paymentIntent, PreAuthorization.REQUEST_CODE)
+            binding.activity.startActivityForResult(paymentIntent, REQUEST_CODE)
 
             return Bundle().apply {
                 putString("code", "SUCCESS")
@@ -62,9 +62,5 @@ class PreAuthorization: Deeplink() {
                 putString("message", e.message ?: "An unexpected error occurred")
             }
         }
-    }
-
-    override fun validateIntent(intent: Intent?): Map<String, Any?> {
-        TODO("Not yet implemented")
     }
 }

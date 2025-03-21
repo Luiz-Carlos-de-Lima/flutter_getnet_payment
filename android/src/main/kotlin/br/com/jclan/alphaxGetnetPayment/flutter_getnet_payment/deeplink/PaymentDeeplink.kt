@@ -17,7 +17,10 @@ class PaymentDeeplink: Deeplink() {
             val paymentType: String? = bundle.getString("paymentType")
             val amount: String? = bundle.getString("amount")
             val callerId: String? = bundle.getString("callerId")
+            val currencyPosition: String? = bundle.getString("currencyPosition")
+            val currencyCode: String? = bundle.getString("currencyCode")
             val orderId: String? = bundle.getString("orderId")
+            val allowPrintCurrentTransaction: Boolean = bundle.getBoolean("allowPrintCurrentTransaction") ?: false
 
             if ((paymentType.equals("credit") || paymentType.equals("debit") || paymentType.equals("voucher") || paymentType.equals("pix")).not()) {
                 throw IllegalArgumentException("Invalid payment details: paymentType")
@@ -39,6 +42,9 @@ class PaymentDeeplink: Deeplink() {
                 appendQueryParameter("amount", amount)
                 appendQueryParameter("callerId", callerId)
                 appendQueryParameter("orderId", orderId)
+                appendQueryParameter("currencyPosition", currencyPosition)
+                appendQueryParameter("currencyCode", currencyCode)
+                appendQueryParameter("allowPrintCurrentTransaction", allowPrintCurrentTransaction.toString())
             }
 
             if (paymentType.equals("credit")) {

@@ -3,10 +3,18 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_getnet_payment/constants/credit_type.dart';
 import 'package:flutter_getnet_payment/constants/payment_type.dart';
+import 'package:flutter_getnet_payment/exceptions/info_exception.dart';
 import 'package:flutter_getnet_payment/exceptions/payment_exception.dart';
 import 'package:flutter_getnet_payment/exceptions/print_exception.dart';
+import 'package:flutter_getnet_payment/exceptions/refund_exception.dart';
 import 'package:flutter_getnet_payment/flutter_getnet_payment.dart';
 import 'package:flutter_getnet_payment/models/payment_payload.dart';
+import 'package:flutter_getnet_payment/models/payment_response.dart';
+import 'package:flutter_getnet_payment/models/pre_autorization_payload.dart';
+import 'package:flutter_getnet_payment/models/refund_payload.dart';
+
+final flutterGetnetPaymentPlugin = FlutterGetnetPayment();
+final List<PaymentResponse> listPayments = [];
 
 void main() {
   runApp(const MaterialApp(home: PaymentApp()));
@@ -34,39 +42,85 @@ class PaymentApp extends StatelessWidget {
                   child: Text('Pagamento'),
                 ),
               ),
-              // SizedBox(
-              //   width: 300,
-              //   height: 45,
-              //   child: ElevatedButton(
-              //     onPressed: () {
-              //       Navigator.of(context).push(MaterialPageRoute(builder: (_) => _CancelPage()));
-              //     },
-              //     style: ElevatedButton.styleFrom(backgroundColor: Colors.red, foregroundColor: Colors.white),
-              //     child: Text('Cancelar'),
-              //   ),
-              // ),
-              // SizedBox(
-              //   width: 300,
-              //   height: 45,
-              //   child: ElevatedButton(
-              //     onPressed: () {
-              //       Navigator.of(context).push(MaterialPageRoute(builder: (_) => _PrintPage()));
-              //     },
-              //     style: ElevatedButton.styleFrom(backgroundColor: Colors.green, foregroundColor: Colors.white),
-              //     child: Text('Imprimir'),
-              //   ),
-              // ),
-              // SizedBox(
-              //   width: 300,
-              //   height: 45,
-              //   child: ElevatedButton(
-              //     onPressed: () {
-              //       Navigator.of(context).push(MaterialPageRoute(builder: (_) => _ReprintPage()));
-              //     },
-              //     style: ElevatedButton.styleFrom(backgroundColor: Colors.orange, foregroundColor: Colors.white),
-              //     child: Text('Reimprimir'),
-              //   ),
-              // ),
+              SizedBox(
+                width: 300,
+                height: 45,
+                child: ElevatedButton(
+                  onPressed: () {
+                    Navigator.of(context).push(MaterialPageRoute(builder: (_) => _PreAutorizationPage()));
+                  },
+                  style: ElevatedButton.styleFrom(backgroundColor: Colors.teal, foregroundColor: Colors.white),
+                  child: Text('Pre Autorização'),
+                ),
+              ),
+              SizedBox(
+                width: 300,
+                height: 45,
+                child: ElevatedButton(
+                  onPressed: () {
+                    Navigator.of(context).push(MaterialPageRoute(builder: (_) => _CancelPage()));
+                  },
+                  style: ElevatedButton.styleFrom(backgroundColor: Colors.red, foregroundColor: Colors.white),
+                  child: Text('Cancelar'),
+                ),
+              ),
+              SizedBox(
+                width: 300,
+                height: 45,
+                child: ElevatedButton(
+                  onPressed: () {
+                    // Navigator.of(context).push(MaterialPageRoute(builder: (_) => _PrintPage()));
+                  },
+                  style: ElevatedButton.styleFrom(backgroundColor: Colors.green, foregroundColor: Colors.white),
+                  child: Text('Imprimir'),
+                ),
+              ),
+              SizedBox(
+                width: 300,
+                height: 45,
+                child: ElevatedButton(
+                  onPressed: () async {
+                    try {
+                      final info = await flutterGetnetPaymentPlugin.reprint();
+
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Reimpressão realizada com sucesso!")));
+                    } on InfoException catch (e) {
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.message)));
+                    } on PrintException catch (e) {
+                      ScaffoldMessenger.of(
+                        context,
+                      ).showSnackBar(SnackBar(content: Text("Não foi realizar a impressão das informações do terminal: ${e.message}")));
+                    } catch (e) {
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erro desconhecido')));
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(backgroundColor: Colors.orange, foregroundColor: Colors.white),
+                  child: Text('Reimprimir'),
+                ),
+              ),
+              SizedBox(
+                width: 300,
+                height: 45,
+                child: ElevatedButton(
+                  onPressed: () async {
+                    try {
+                      final info = await flutterGetnetPaymentPlugin.info();
+
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("info: ${info.toJson()}")));
+                    } on InfoException catch (e) {
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.message)));
+                    } on PrintException catch (e) {
+                      ScaffoldMessenger.of(
+                        context,
+                      ).showSnackBar(SnackBar(content: Text("Não foi realizar a impressão das informações do terminal: ${e.message}")));
+                    } catch (e) {
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erro desconhecido')));
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(backgroundColor: Colors.indigo, foregroundColor: Colors.white),
+                  child: Text('Info'),
+                ),
+              ),
             ],
           ),
         ),
@@ -85,7 +139,7 @@ class _PaymentPage extends StatefulWidget {
 class _PaymentPageState extends State<_PaymentPage> {
   final _amountEC = TextEditingController();
   final _qtdEC = TextEditingController();
-  final _flutterGetnetPaymentPlugin = FlutterGetnetPayment();
+
   final List<DropdownMenuItem<PaymentType?>> _listPaymentTypes = PaymentType.values.map((e) => DropdownMenuItem(value: e, child: Text(e.name))).toList();
   final List<DropdownMenuItem<CreditType?>> _listCreditType = CreditType.values.map((e) => DropdownMenuItem(value: e, child: Text(e.name))).toList();
   PaymentType _transactionType = PaymentType.debit;
@@ -219,13 +273,9 @@ class _PaymentPageState extends State<_PaymentPage> {
                           orderId: Random().nextInt(1000).toString(),
                           installments: qtdPar,
                         );
-                        final response = await _flutterGetnetPaymentPlugin.pay(paymentPayload: payment);
+                        final response = await flutterGetnetPaymentPlugin.pay(paymentPayload: payment);
 
-                        // final print = PrintPayload(
-                        //   printableContent: [Contentprint(type: PrintType.line, content: response.toJson().toString())],
-                        //   showFeedbackScreen: false,
-                        // );
-                        // await _flutterGetnetPaymentPlugin.print(printPayload: print);
+                        listPayments.add(response);
 
                         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Simulacao pagamento e Impressão realizada com sucesso!")));
                       } on PaymentException catch (e) {
@@ -251,145 +301,236 @@ class _PaymentPageState extends State<_PaymentPage> {
   }
 }
 
-// class _CancelPage extends StatefulWidget {
-//   const _CancelPage({super.key});
+class _PreAutorizationPage extends StatefulWidget {
+  const _PreAutorizationPage({super.key});
 
-//   @override
-//   State<_CancelPage> createState() => _CancelPageState();
-// }
+  @override
+  State<_PreAutorizationPage> createState() => _PreAutorizationPageState();
+}
 
-// class _CancelPageState extends State<_CancelPage> {
-//   final _flutterGetnetPaymentPlugin = FlutterGetnetPayment();
-//   final _amountEC = TextEditingController();
-//   final _atkEC = TextEditingController();
+class _PreAutorizationPageState extends State<_PreAutorizationPage> {
+  final _amountEC = TextEditingController();
 
-//   String _responseCancel = "";
-//   bool _editableAmount = false;
+  @override
+  void initState() {
+    super.initState();
+  }
 
-//   @override
-//   void initState() {
-//     super.initState();
-//   }
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      child: Scaffold(
+        appBar: AppBar(title: Text('pagamento'), centerTitle: true, leading: Container()),
+        body: Center(
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(10.0),
+              child: Column(
+                children: [
+                  Align(alignment: Alignment.centerLeft, child: Text('Tipo do Pagamento')),
+                  SizedBox(height: 10.0),
+                  Align(alignment: Alignment.centerLeft, child: Text('Valor')),
+                  SizedBox(height: 10),
+                  TextFormField(
+                    controller: _amountEC,
+                    decoration: InputDecoration(hintText: 'Valor', border: OutlineInputBorder()),
+                    keyboardType: TextInputType.number,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+        bottomNavigationBar: Padding(
+          padding: const EdgeInsets.all(10.0),
+          child: Row(
+            children: [
+              Expanded(
+                child: SizedBox(
+                  height: 40,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    style: ElevatedButton.styleFrom(backgroundColor: Colors.red, foregroundColor: Colors.white),
+                    child: Text('Voltar'),
+                  ),
+                ),
+              ),
+              SizedBox(width: 10),
+              Expanded(
+                child: SizedBox(
+                  height: 40,
+                  child: ElevatedButton(
+                    onPressed: () async {
+                      try {
+                        double amount = double.parse(_amountEC.text);
+                        final preAutorization = PreAutorizationPayload(
+                          amount: amount,
+                          callerId: Random().nextInt(1000).toString(),
+                          orderId: Random().nextInt(1000).toString(),
+                        );
+                        final response = await flutterGetnetPaymentPlugin.preAutorization(preAutorizationPayload: preAutorization);
 
-//   @override
-//   Widget build(BuildContext context) {
-//     return SafeArea(
-//       child: Scaffold(
-//         appBar: AppBar(title: Text('cancelar'), centerTitle: true, leading: Container()),
-//         body: Center(
-//           child: SingleChildScrollView(
-//             child: Padding(
-//               padding: const EdgeInsets.all(10.0),
-//               child: Column(
-//                 children: [
-//                   Align(alignment: Alignment.centerLeft, child: Text('Valor')),
-//                   SizedBox(height: 10),
-//                   TextFormField(
-//                     controller: _amountEC,
-//                     decoration: InputDecoration(hintText: 'Valor', border: OutlineInputBorder()),
-//                     keyboardType: TextInputType.number,
-//                   ),
-//                   SizedBox(height: 10),
-//                   Align(alignment: Alignment.centerLeft, child: Text('Identificação do pagamento')),
-//                   SizedBox(height: 10),
-//                   TextFormField(controller: _atkEC, decoration: InputDecoration(hintText: 'ATK', border: OutlineInputBorder())),
-//                   InkWell(
-//                     onTap: () {
-//                       setState(() {
-//                         _editableAmount = !_editableAmount;
-//                       });
-//                     },
-//                     child: Row(
-//                       children: [
-//                         Checkbox(
-//                           value: _editableAmount,
-//                           onChanged: (_) {
-//                             setState(() {
-//                               _editableAmount = !_editableAmount;
-//                             });
-//                           },
-//                         ),
-//                         Text("Valor Editável", style: TextStyle(fontSize: 18)),
-//                       ],
-//                     ),
-//                   ),
-//                   Text(_responseCancel),
-//                 ],
-//               ),
-//             ),
-//           ),
-//         ),
-//         bottomNavigationBar: Padding(
-//           padding: const EdgeInsets.all(10.0),
-//           child: Row(
-//             children: [
-//               Expanded(
-//                 child: SizedBox(
-//                   height: 40,
-//                   child: ElevatedButton(
-//                     onPressed: () {
-//                       Navigator.of(context).pop();
-//                     },
-//                     style: ElevatedButton.styleFrom(backgroundColor: Colors.red, foregroundColor: Colors.white),
-//                     child: Text('Voltar'),
-//                   ),
-//                 ),
-//               ),
-//               SizedBox(width: 10),
-//               Expanded(
-//                 child: SizedBox(
-//                   height: 40,
-//                   child: ElevatedButton(
-//                     onPressed: () async {
-//                       try {
-//                         _responseCancel = "SEM RESPOSTA";
-//                         double? amount = double.tryParse(_amountEC.text);
-//                         final cancel = CancelPayload(amount: amount, atk: _atkEC.text, editableAmount: _editableAmount);
-//                         final response = await _flutterGetnetPaymentPlugin.cancel(cancelPayload: cancel);
-//                         _responseCancel = response.toJson().toString();
-//                         final print = PrintPayload(
-//                           printableContent: [
-//                             Contentprint(
-//                               type: PrintType.text,
-//                               align: PrintAlign.center,
-//                               size: PrintSize.big,
-//                               content: "Cancelamento Simulado\n\n${response.toJson().toString()}",
-//                             ),
-//                           ],
-//                           showFeedbackScreen: false,
-//                         );
-//                         await _flutterGetnetPaymentPlugin.print(printPayload: print);
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Simulacao pre autorização ")));
+                      } on PaymentException catch (e) {
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.message)));
+                      } on PrintException catch (e) {
+                        ScaffoldMessenger.of(
+                          context,
+                        ).showSnackBar(SnackBar(content: Text("Simulação de pagamento realizado mas erro na impressão: ${e.message}")));
+                      } catch (e) {
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erro desconhecido')));
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(backgroundColor: Colors.green, foregroundColor: Colors.white),
+                    child: Text('Pagar'),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
 
-//                         ScaffoldMessenger.of(
-//                           context,
-//                         ).showSnackBar(SnackBar(content: Text("Simulacao Cancelamento e Impressão realizada com sucesso! $cancel")));
-//                       } on CancelException catch (e) {
-//                         _responseCancel = e.message;
-//                         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.message)));
-//                       } on PrintException catch (e) {
-//                         _responseCancel = e.message;
-//                         ScaffoldMessenger.of(
-//                           context,
-//                         ).showSnackBar(SnackBar(content: Text("Simulação de pagamento realizado mas erro na impressão: ${e.message}")));
-//                       } catch (e) {
-//                         _responseCancel = "Erro desconhecido";
-//                         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erro desconhecido')));
-//                       } finally {
-//                         setState(() {});
-//                       }
-//                     },
-//                     style: ElevatedButton.styleFrom(backgroundColor: Colors.green, foregroundColor: Colors.white),
-//                     child: Text('Continuar'),
-//                   ),
-//                 ),
-//               ),
-//             ],
-//           ),
-//         ),
-//       ),
-//     );
-//   }
-// }
+class _CancelPage extends StatefulWidget {
+  const _CancelPage({super.key});
+
+  @override
+  State<_CancelPage> createState() => _CancelPageState();
+}
+
+class _CancelPageState extends State<_CancelPage> {
+  int? _indexPayment;
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      child: Scaffold(
+        appBar: AppBar(title: Text('cancelar'), centerTitle: true, leading: Container()),
+        body: Center(
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(10.0),
+              child: Column(
+                spacing: 10,
+                children: [
+                  Text("Lista de pagamentos que podem ser cancelados"),
+                  ...List.generate(
+                    listPayments.length,
+                    (index) => InkWell(
+                      onTap: () {
+                        setState(() {
+                          _indexPayment = index;
+                        });
+                      },
+                      child: Container(
+                        padding: EdgeInsets.all(10),
+                        width: double.infinity,
+                        decoration: BoxDecoration(color: _indexPayment == index ? Colors.blue : Colors.grey.shade300, borderRadius: BorderRadius.circular(10)),
+                        child: Text(listPayments[index].amount.toString(), style: TextStyle(color: _indexPayment == index ? Colors.white : Colors.black)),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+        bottomNavigationBar: Padding(
+          padding: const EdgeInsets.all(10.0),
+          child: Row(
+            children: [
+              Expanded(
+                child: SizedBox(
+                  height: 40,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    style: ElevatedButton.styleFrom(backgroundColor: Colors.red, foregroundColor: Colors.white),
+                    child: Text('Voltar'),
+                  ),
+                ),
+              ),
+              Expanded(
+                child: SizedBox(
+                  height: 40,
+                  child: ElevatedButton(
+                    onPressed:
+                        _indexPayment != null
+                            ? () async {
+                              try {
+                                String? input = listPayments[_indexPayment!].gmtDateTime?.toString();
+                                String? formattedDate;
+
+                                if (input != null) {
+                                  String month = input.substring(0, 2); // MM
+                                  String day = input.substring(2, 4); // DD
+                                  String hour = input.substring(4, 6); // hh
+                                  String minute = input.substring(6, 8); // mm
+                                  String second = input.substring(8, 10); // ss
+
+                                  DateTime now = DateTime.now();
+                                  DateTime date = DateTime.utc(
+                                    now.year, // Usando o ano atual
+                                    int.parse(month), // Mês
+                                    int.parse(day), // Dia
+                                    int.parse(hour), // Hora
+                                    int.parse(minute), // Minuto
+                                    int.parse(second), // Segundo
+                                  );
+
+                                  final twoDigits = (int n) {
+                                    if (n >= 10) return "$n";
+                                    return "0$n";
+                                  };
+
+                                  formattedDate = "${twoDigits(date.day)}/${twoDigits(date.month)}/${twoDigits(date.year)}";
+                                }
+                                final info = await flutterGetnetPaymentPlugin.info();
+
+                                final refundPayload = RefundPayload(
+                                  amount: listPayments[_indexPayment!].amount,
+                                  transactionDate: formattedDate,
+                                  cvNumber: listPayments[_indexPayment!].cvNumber,
+                                  originTerminal: info.numlogic,
+                                );
+
+                                final response = await flutterGetnetPaymentPlugin.refund(refundPayload: refundPayload);
+
+                                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Simulacao Estorno realizada com sucesso!")));
+                              } on RefundException catch (e) {
+                                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.message)));
+                              } on PrintException catch (e) {
+                                ScaffoldMessenger.of(
+                                  context,
+                                ).showSnackBar(SnackBar(content: Text("Simulação de pagamento realizado mas erro na impressão: ${e.message}")));
+                              } catch (e) {
+                                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erro desconhecido')));
+                              }
+                            }
+                            : null,
+                    style: ElevatedButton.styleFrom(backgroundColor: Colors.blue, foregroundColor: Colors.white),
+                    child: Text('Cancelar'),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
 
 // class _PrintPage extends StatefulWidget {
 //   const _PrintPage({super.key});
