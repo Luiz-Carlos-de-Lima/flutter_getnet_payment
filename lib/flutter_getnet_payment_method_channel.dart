@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_getnet_payment/constants/status_deeplink.dart';
 import 'package:flutter_getnet_payment/exceptions/payment_exception.dart';
+import 'package:flutter_getnet_payment/exceptions/print_exception.dart';
 import 'package:flutter_getnet_payment/exceptions/refund_exception.dart';
 import 'package:flutter_getnet_payment/exceptions/reprint_exception.dart';
 import 'package:flutter_getnet_payment/exceptions/status_payment_exception%20copy.dart';
@@ -9,6 +10,7 @@ import 'package:flutter_getnet_payment/models/Info_response.dart';
 import 'package:flutter_getnet_payment/models/payment_response.dart';
 import 'package:flutter_getnet_payment/models/pre_autorization_payload.dart';
 import 'package:flutter_getnet_payment/models/pre_autorization_response.dart';
+import 'package:flutter_getnet_payment/models/print_payload.dart';
 import 'package:flutter_getnet_payment/models/refund_payload.dart';
 import 'package:flutter_getnet_payment/models/refund_response.dart';
 import 'package:flutter_getnet_payment/models/status_payment_payload.dart';
@@ -114,6 +116,27 @@ class MethodChannelFlutterGetnetPayment extends FlutterGetnetPaymentPlatform {
       throw RefundException(message: e.message ?? 'PlatformException');
     } catch (e) {
       throw RefundException(message: "Status payment Error: $e");
+    }
+  }
+
+  @override
+  Future<void> print({required PrintPayload printPayload}) async {
+    try {
+      final response = await methodChannel.invokeMethod<Map>('print', printPayload.toJson());
+
+      if (response is Map) {
+        if (response['code'] != StatusDeeplink.SUCCESS.name) {
+          throw PrintException(message: response['message']);
+        }
+      } else {
+        throw PrintException(message: 'invalid response');
+      }
+    } on PrintException catch (e) {
+      throw PrintException(message: e.message);
+    } on PlatformException catch (e) {
+      throw PrintException(message: e.message ?? 'PlatformException');
+    } catch (e) {
+      throw PrintException(message: "Print Error: $e");
     }
   }
 

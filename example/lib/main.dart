@@ -1,17 +1,22 @@
+import 'dart:convert';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_getnet_payment/constants/credit_type.dart';
 import 'package:flutter_getnet_payment/constants/payment_type.dart';
+import 'package:flutter_getnet_payment/constants/print_content_types.dart';
 import 'package:flutter_getnet_payment/exceptions/info_exception.dart';
 import 'package:flutter_getnet_payment/exceptions/payment_exception.dart';
 import 'package:flutter_getnet_payment/exceptions/print_exception.dart';
 import 'package:flutter_getnet_payment/exceptions/refund_exception.dart';
 import 'package:flutter_getnet_payment/flutter_getnet_payment.dart';
+import 'package:flutter_getnet_payment/models/content_print.dart';
 import 'package:flutter_getnet_payment/models/payment_payload.dart';
 import 'package:flutter_getnet_payment/models/payment_response.dart';
 import 'package:flutter_getnet_payment/models/pre_autorization_payload.dart';
+import 'package:flutter_getnet_payment/models/print_payload.dart';
 import 'package:flutter_getnet_payment/models/refund_payload.dart';
+import 'package:http/http.dart' as http;
 
 final flutterGetnetPaymentPlugin = FlutterGetnetPayment();
 final List<PaymentResponse> listPayments = [];
@@ -69,7 +74,7 @@ class PaymentApp extends StatelessWidget {
                 height: 45,
                 child: ElevatedButton(
                   onPressed: () {
-                    // Navigator.of(context).push(MaterialPageRoute(builder: (_) => _PrintPage()));
+                    Navigator.of(context).push(MaterialPageRoute(builder: (_) => _PrintPage()));
                   },
                   style: ElevatedButton.styleFrom(backgroundColor: Colors.green, foregroundColor: Colors.white),
                   child: Text('Imprimir'),
@@ -274,8 +279,9 @@ class _PaymentPageState extends State<_PaymentPage> {
                           installments: qtdPar,
                         );
                         final response = await flutterGetnetPaymentPlugin.pay(paymentPayload: payment);
-
                         listPayments.add(response);
+                        final print = PrintPayload(printableContent: [Contentprint(type: PrintType.line, content: response.toJson().toString())]);
+                        await flutterGetnetPaymentPlugin.print(printPayload: print);
 
                         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Simulacao pagamento e Impressão realizada com sucesso!")));
                       } on PaymentException catch (e) {
@@ -532,333 +538,187 @@ class _CancelPageState extends State<_CancelPage> {
   }
 }
 
-// class _PrintPage extends StatefulWidget {
-//   const _PrintPage({super.key});
+class _PrintPage extends StatefulWidget {
+  const _PrintPage({super.key});
 
-//   @override
-//   State<_PrintPage> createState() => _PrintPageState();
-// }
+  @override
+  State<_PrintPage> createState() => _PrintPageState();
+}
 
-// class _PrintPageState extends State<_PrintPage> {
-//   final _flutterGetnetPaymentPlugin = FlutterGetnetPayment();
-//   final _printTextEC = TextEditingController();
-//   final List<DropdownMenuItem<PrintType>> _listPrintType = PrintType.values.map((e) => DropdownMenuItem(value: e, child: Text(e.name))).toList();
-//   final List<DropdownMenuItem<PrintAlign>> _listPrintAlign = PrintAlign.values.map((e) => DropdownMenuItem(value: e, child: Text(e.name))).toList();
-//   final List<DropdownMenuItem<PrintSize>> _listPrintSize = PrintSize.values.map((e) => DropdownMenuItem(value: e, child: Text(e.name))).toList();
+class _PrintPageState extends State<_PrintPage> {
+  final _flutterGetnetPaymentPlugin = FlutterGetnetPayment();
+  final _printTextEC = TextEditingController();
+  final List<DropdownMenuItem<PrintType>> _listPrintType = PrintType.values.map((e) => DropdownMenuItem(value: e, child: Text(e.name))).toList();
+  final List<DropdownMenuItem<PrintAlign>> _listPrintAlign = PrintAlign.values.map((e) => DropdownMenuItem(value: e, child: Text(e.name))).toList();
+  final List<DropdownMenuItem<PrintSize>> _listPrintSize = PrintSize.values.map((e) => DropdownMenuItem(value: e, child: Text(e.name))).toList();
 
-//   PrintType _printType = PrintType.line;
-//   PrintAlign? _printAlign = PrintAlign.center;
-//   PrintSize? _printSize = PrintSize.medium;
+  PrintType _printType = PrintType.line;
+  PrintAlign? _printAlign = PrintAlign.center;
+  PrintSize? _printSize = PrintSize.medium;
 
-//   bool _showFeedbackScreen = false;
+  @override
+  void initState() {
+    super.initState();
+  }
 
-//   @override
-//   void initState() {
-//     super.initState();
-//   }
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      child: Scaffold(
+        appBar: AppBar(title: Text('impresssão'), centerTitle: true, leading: Container()),
+        body: Center(
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(10.0),
+              child: Column(
+                children: [
+                  SizedBox(height: 10),
+                  Align(alignment: Alignment.centerLeft, child: Text('Tipo de Impressão')),
+                  SizedBox(height: 10),
+                  Container(
+                    padding: const EdgeInsets.all(10.0),
+                    decoration: BoxDecoration(border: Border.all(), borderRadius: BorderRadius.circular(5)),
+                    height: 55,
+                    child: DropdownButton(
+                      value: _printType,
+                      items: _listPrintType,
+                      isExpanded: true,
+                      underline: Container(),
+                      onChanged: (value) {
+                        _printType = value!;
+                        if (_printType == PrintType.text) {
+                          _printAlign = PrintAlign.center;
+                          _printSize = PrintSize.medium;
+                        } else {
+                          _printAlign = null;
+                          _printSize = null;
+                        }
+                        setState(() {});
+                      },
+                    ),
+                  ),
+                  if (_printType == PrintType.text)
+                    Column(
+                      children: [
+                        SizedBox(height: 10),
+                        Align(alignment: Alignment.centerLeft, child: Text('Alinhamento da Impressão')),
+                        SizedBox(height: 10),
+                        Container(
+                          padding: const EdgeInsets.all(10.0),
+                          decoration: BoxDecoration(border: Border.all(), borderRadius: BorderRadius.circular(5)),
+                          height: 55,
+                          child: DropdownButton(
+                            value: _printAlign,
+                            items: _listPrintAlign,
+                            isExpanded: true,
+                            underline: Container(),
+                            onChanged: (value) {
+                              _printAlign = value!;
+                              setState(() {});
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                  if (_printType == PrintType.text)
+                    Column(
+                      children: [
+                        SizedBox(height: 10),
+                        Align(alignment: Alignment.centerLeft, child: Text('Tamanho da Impressão')),
+                        SizedBox(height: 10),
+                        Container(
+                          padding: const EdgeInsets.all(10.0),
+                          decoration: BoxDecoration(border: Border.all(), borderRadius: BorderRadius.circular(5)),
+                          height: 55,
+                          child: DropdownButton(
+                            value: _printSize,
+                            items: _listPrintSize,
+                            isExpanded: true,
+                            underline: Container(),
+                            onChanged: (value) {
+                              _printSize = value!;
+                              setState(() {});
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                  (_printType != PrintType.image)
+                      ? Column(
+                        children: [
+                          SizedBox(height: 10),
+                          Align(alignment: Alignment.centerLeft, child: Text('Texto para Impressão')),
+                          SizedBox(height: 10),
+                          TextFormField(controller: _printTextEC, decoration: InputDecoration(hintText: 'Texto', border: OutlineInputBorder())),
+                        ],
+                      )
+                      : Column(children: [Image.network('https://zup.com.br/wp-content/uploads/2021/03/5ce2fde702ef93c1e994d987_flutter.png')]),
+                ],
+              ),
+            ),
+          ),
+        ),
+        bottomNavigationBar: Padding(
+          padding: const EdgeInsets.all(10.0),
+          child: Row(
+            children: [
+              Expanded(
+                child: SizedBox(
+                  height: 40,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    style: ElevatedButton.styleFrom(backgroundColor: Colors.red, foregroundColor: Colors.white),
+                    child: Text('Voltar'),
+                  ),
+                ),
+              ),
+              SizedBox(width: 10),
+              Expanded(
+                child: SizedBox(
+                  height: 40,
+                  child: ElevatedButton(
+                    onPressed: () async {
+                      try {
+                        String? image64;
+                        if (_printType == PrintType.image) {
+                          image64 = await imageToBase64('https://zup.com.br/wp-content/uploads/2021/03/5ce2fde702ef93c1e994d987_flutter.png');
+                        }
+                        final print = PrintPayload(
+                          printableContent: [
+                            Contentprint(type: _printType, align: _printAlign, content: _printTextEC.text, size: _printSize, imagePath: image64),
+                          ],
+                        );
+                        await _flutterGetnetPaymentPlugin.print(printPayload: print);
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Impressão realizada com sucesso!")));
+                      } on PrintException catch (e) {
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.message)));
+                      } catch (e) {
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erro desconhecido')));
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(backgroundColor: Colors.green, foregroundColor: Colors.white),
+                    child: Text('imprimir'),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 
-//   @override
-//   Widget build(BuildContext context) {
-//     return SafeArea(
-//       child: Scaffold(
-//         appBar: AppBar(title: Text('impresssão'), centerTitle: true, leading: Container()),
-//         body: Center(
-//           child: SingleChildScrollView(
-//             child: Padding(
-//               padding: const EdgeInsets.all(10.0),
-//               child: Column(
-//                 children: [
-//                   SizedBox(height: 10),
-//                   Align(alignment: Alignment.centerLeft, child: Text('Tipo de Impressão')),
-//                   SizedBox(height: 10),
-//                   Container(
-//                     padding: const EdgeInsets.all(10.0),
-//                     decoration: BoxDecoration(border: Border.all(), borderRadius: BorderRadius.circular(5)),
-//                     height: 55,
-//                     child: DropdownButton(
-//                       value: _printType,
-//                       items: _listPrintType,
-//                       isExpanded: true,
-//                       underline: Container(),
-//                       onChanged: (value) {
-//                         _printType = value!;
-//                         if (_printType == PrintType.text) {
-//                           _printAlign = PrintAlign.center;
-//                           _printSize = PrintSize.medium;
-//                         } else {
-//                           _printAlign = null;
-//                           _printSize = null;
-//                         }
-//                         setState(() {});
-//                       },
-//                     ),
-//                   ),
-//                   if (_printType == PrintType.text)
-//                     Column(
-//                       children: [
-//                         SizedBox(height: 10),
-//                         Align(alignment: Alignment.centerLeft, child: Text('Alinhamento da Impressão')),
-//                         SizedBox(height: 10),
-//                         Container(
-//                           padding: const EdgeInsets.all(10.0),
-//                           decoration: BoxDecoration(border: Border.all(), borderRadius: BorderRadius.circular(5)),
-//                           height: 55,
-//                           child: DropdownButton(
-//                             value: _printAlign,
-//                             items: _listPrintAlign,
-//                             isExpanded: true,
-//                             underline: Container(),
-//                             onChanged: (value) {
-//                               _printAlign = value!;
-//                               setState(() {});
-//                             },
-//                           ),
-//                         ),
-//                       ],
-//                     ),
-//                   if (_printType == PrintType.text)
-//                     Column(
-//                       children: [
-//                         SizedBox(height: 10),
-//                         Align(alignment: Alignment.centerLeft, child: Text('Tamanho da Impressão')),
-//                         SizedBox(height: 10),
-//                         Container(
-//                           padding: const EdgeInsets.all(10.0),
-//                           decoration: BoxDecoration(border: Border.all(), borderRadius: BorderRadius.circular(5)),
-//                           height: 55,
-//                           child: DropdownButton(
-//                             value: _printSize,
-//                             items: _listPrintSize,
-//                             isExpanded: true,
-//                             underline: Container(),
-//                             onChanged: (value) {
-//                               _printSize = value!;
-//                               setState(() {});
-//                             },
-//                           ),
-//                         ),
-//                       ],
-//                     ),
-//                   (_printType != PrintType.image)
-//                       ? Column(
-//                         children: [
-//                           SizedBox(height: 10),
-//                           Align(alignment: Alignment.centerLeft, child: Text('Texto para Impressão')),
-//                           SizedBox(height: 10),
-//                           TextFormField(controller: _printTextEC, decoration: InputDecoration(hintText: 'Texto', border: OutlineInputBorder())),
-//                         ],
-//                       )
-//                       : Column(children: [Image.network('https://zup.com.br/wp-content/uploads/2021/03/5ce2fde702ef93c1e994d987_flutter.png')]),
-//                   InkWell(
-//                     onTap: () {
-//                       setState(() {
-//                         _showFeedbackScreen = !_showFeedbackScreen;
-//                       });
-//                     },
-//                     child: Row(
-//                       children: [
-//                         Checkbox(
-//                           value: _showFeedbackScreen,
-//                           onChanged: (_) {
-//                             setState(() {
-//                               _showFeedbackScreen = !_showFeedbackScreen;
-//                             });
-//                           },
-//                         ),
-//                         Expanded(child: Text("Mostrar tela de feedback", style: TextStyle(fontSize: 18))),
-//                       ],
-//                     ),
-//                   ),
-//                 ],
-//               ),
-//             ),
-//           ),
-//         ),
-//         bottomNavigationBar: Padding(
-//           padding: const EdgeInsets.all(10.0),
-//           child: Row(
-//             children: [
-//               Expanded(
-//                 child: SizedBox(
-//                   height: 40,
-//                   child: ElevatedButton(
-//                     onPressed: () {
-//                       Navigator.of(context).pop();
-//                     },
-//                     style: ElevatedButton.styleFrom(backgroundColor: Colors.red, foregroundColor: Colors.white),
-//                     child: Text('Voltar'),
-//                   ),
-//                 ),
-//               ),
-//               SizedBox(width: 10),
-//               Expanded(
-//                 child: SizedBox(
-//                   height: 40,
-//                   child: ElevatedButton(
-//                     onPressed: () async {
-//                       try {
-//                         String? image64;
-//                         if (_printType == PrintType.image) {
-//                           image64 = await imageToBase64('https://zup.com.br/wp-content/uploads/2021/03/5ce2fde702ef93c1e994d987_flutter.png');
-//                         }
-//                         final print = PrintPayload(
-//                           printableContent: [
-//                             Contentprint(type: _printType, align: _printAlign, content: _printTextEC.text, size: _printSize, imagePath: image64),
-//                           ],
-//                           showFeedbackScreen: _showFeedbackScreen,
-//                         );
-//                         await _flutterGetnetPaymentPlugin.print(printPayload: print);
-//                         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Impressão realizada com sucesso!")));
-//                       } on PrintException catch (e) {
-//                         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.message)));
-//                       } catch (e) {
-//                         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erro desconhecido')));
-//                       }
-//                     },
-//                     style: ElevatedButton.styleFrom(backgroundColor: Colors.green, foregroundColor: Colors.white),
-//                     child: Text('imprimir'),
-//                   ),
-//                 ),
-//               ),
-//             ],
-//           ),
-//         ),
-//       ),
-//     );
-//   }
-
-//   Future<String?> imageToBase64(String imageUrl) async {
-//     try {
-//       final response = await http.get(Uri.parse(imageUrl));
-//       if (response.statusCode == 200) {
-//         return base64Encode(response.bodyBytes);
-//       }
-//     } catch (e) {
-//       print("Erro ao converter imagem para Base64: $e");
-//     }
-//     return null;
-//   }
-// }
-
-// class _ReprintPage extends StatefulWidget {
-//   const _ReprintPage({super.key});
-
-//   @override
-//   State<_ReprintPage> createState() => _ReprintPageState();
-// }
-
-// class _ReprintPageState extends State<_ReprintPage> {
-//   final _flutterGetnetPaymentPlugin = FlutterGetnetPayment();
-//   final _atkEC = TextEditingController();
-//   final List<DropdownMenuItem<TypeCustomer>> _listTypeCustomer = TypeCustomer.values.map((e) => DropdownMenuItem(value: e, child: Text(e.name))).toList();
-
-//   TypeCustomer _typeCustomer = TypeCustomer.MERCHANT;
-
-//   bool _showFeedbackScreen = false;
-
-//   @override
-//   void initState() {
-//     super.initState();
-//   }
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return SafeArea(
-//       child: Scaffold(
-//         appBar: AppBar(title: Text('Reimprimir'), centerTitle: true, leading: Container()),
-//         body: Center(
-//           child: SingleChildScrollView(
-//             child: Padding(
-//               padding: const EdgeInsets.all(10.0),
-//               child: Column(
-//                 children: [
-//                   Align(alignment: Alignment.centerLeft, child: Text('Tipo de Impressão')),
-//                   SizedBox(height: 10),
-//                   Container(
-//                     padding: const EdgeInsets.all(10.0),
-//                     decoration: BoxDecoration(border: Border.all(), borderRadius: BorderRadius.circular(5)),
-//                     height: 55,
-//                     child: DropdownButton(
-//                       value: _typeCustomer,
-//                       items: _listTypeCustomer,
-//                       isExpanded: true,
-//                       underline: Container(),
-//                       onChanged: (value) {
-//                         _typeCustomer = value!;
-//                         setState(() {});
-//                       },
-//                     ),
-//                   ),
-//                   SizedBox(height: 10),
-//                   Align(alignment: Alignment.centerLeft, child: Text('Identificação do pagamento')),
-//                   SizedBox(height: 10),
-//                   TextFormField(controller: _atkEC, decoration: InputDecoration(hintText: 'ATK', border: OutlineInputBorder())),
-//                   InkWell(
-//                     onTap: () {
-//                       setState(() {
-//                         _showFeedbackScreen = !_showFeedbackScreen;
-//                       });
-//                     },
-//                     child: Row(
-//                       children: [
-//                         Checkbox(
-//                           value: _showFeedbackScreen,
-//                           onChanged: (_) {
-//                             setState(() {
-//                               _showFeedbackScreen = !_showFeedbackScreen;
-//                             });
-//                           },
-//                         ),
-//                         Expanded(child: Text("Mostrar tela de feedback", style: TextStyle(fontSize: 18))),
-//                       ],
-//                     ),
-//                   ),
-//                 ],
-//               ),
-//             ),
-//           ),
-//         ),
-//         bottomNavigationBar: Padding(
-//           padding: const EdgeInsets.all(10.0),
-//           child: Row(
-//             children: [
-//               Expanded(
-//                 child: SizedBox(
-//                   height: 40,
-//                   child: ElevatedButton(
-//                     onPressed: () {
-//                       Navigator.of(context).pop();
-//                     },
-//                     style: ElevatedButton.styleFrom(backgroundColor: Colors.red, foregroundColor: Colors.white),
-//                     child: Text('Voltar'),
-//                   ),
-//                 ),
-//               ),
-//               SizedBox(width: 10),
-//               Expanded(
-//                 child: SizedBox(
-//                   height: 40,
-//                   child: ElevatedButton(
-//                     onPressed: () async {
-//                       try {
-//                         final reprint = ReprintPayload(atk: _atkEC.text, typeCustomer: _typeCustomer, showFeedbackScreen: _showFeedbackScreen);
-//                         await _flutterGetnetPaymentPlugin.reprint(reprintPayload: reprint);
-//                         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Impressão realizada com sucesso!")));
-//                       } on ReprintException catch (e) {
-//                         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.message)));
-//                       } catch (e) {
-//                         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erro desconhecido')));
-//                       }
-//                     },
-//                     style: ElevatedButton.styleFrom(backgroundColor: Colors.green, foregroundColor: Colors.white),
-//                     child: Text('Reimprimir'),
-//                   ),
-//                 ),
-//               ),
-//             ],
-//           ),
-//         ),
-//       ),
-//     );
-//   }
-// }
+  Future<String?> imageToBase64(String imageUrl) async {
+    try {
+      final response = await http.get(Uri.parse(imageUrl));
+      if (response.statusCode == 200) {
+        return base64Encode(response.bodyBytes);
+      }
+    } catch (e) {
+      print("Erro ao converter imagem para Base64: $e");
+    }
+    return null;
+  }
+}

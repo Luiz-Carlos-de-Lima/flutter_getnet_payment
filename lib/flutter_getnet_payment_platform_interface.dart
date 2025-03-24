@@ -1,6 +1,7 @@
 import 'package:flutter_getnet_payment/models/Info_response.dart';
 import 'package:flutter_getnet_payment/models/payment_response.dart';
 import 'package:flutter_getnet_payment/models/pre_autorization_response.dart';
+import 'package:flutter_getnet_payment/models/print_payload.dart';
 import 'package:flutter_getnet_payment/models/refund_payload.dart';
 import 'package:flutter_getnet_payment/models/refund_response.dart';
 import 'package:flutter_getnet_payment/models/status_payment_payload.dart';
@@ -46,6 +47,10 @@ abstract class FlutterGetnetPaymentPlatform extends PlatformInterface {
 
   Future<RefundResponse> refund({required RefundPayload refundPayload}) {
     throw UnimplementedError('refund() has not been implemented.');
+  }
+
+  Future<void> print({required PrintPayload printPayload}) {
+    throw UnimplementedError('print() has not been implemented.');
   }
 
   Future<void> reprint() async {

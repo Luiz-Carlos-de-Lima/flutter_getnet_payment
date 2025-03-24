@@ -3,6 +3,7 @@ package br.com.jclan.alphaxGetnetPayment.flutter_getnet_payment
 import android.os.Bundle
 import android.app.Activity
 import android.content.Intent
+
 import android.util.Log
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.activity.ActivityAware
@@ -18,6 +19,7 @@ import br.com.jclan.alphaxGetnetPayment.flutter_getnet_payment.deeplink.PreAutho
 import br.com.jclan.alphaxGetnetPayment.flutter_getnet_payment.deeplink.RefundDeeplink
 import br.com.jclan.alphaxGetnetPayment.flutter_getnet_payment.deeplink.ReprintDeeplink
 import br.com.jclan.alphaxGetnetPayment.flutter_getnet_payment.deeplink.StatusDeeplink
+import br.com.jclan.alphaxGetnetPayment.flutter_getnet_payment.services.PrintService
 import com.getnet.posdigital.PosDigital
 
 class FlutterGetnetPaymentPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
@@ -148,6 +150,22 @@ class FlutterGetnetPaymentPlugin: FlutterPlugin, MethodCallHandler, ActivityAwar
           putBoolean("allowPrintCurrentTransaction", call.argument<Boolean>("allowPrintCurrentTransaction") ?: false)
         }
         starDeeplink(refundDeeplink, bundle)
+      }
+      "print" -> {
+        val listPrintContent: List<HashMap<String, Any?>>? = call.argument<List<HashMap<String, Any?>>>("printable_content")
+        val bundleResult = PrintService().start(listPrintContent?.toBundleList())
+
+        if (bundleResult.getString("code") == "SUCCESS") {
+          val data: Map<String, Any?> = mapOf(
+            "code" to "SUCCESS",
+            "message" to bundleResult.getString("message")
+          )
+          resultScope?.success(data)
+        } else {
+          val message: String = (bundleResult.getString("message") ?: "result error").toString()
+          resultScope?.error((bundleResult.getString("code") ?: "ERROR").toString(), message, null)
+          resultScope = null
+        }
       }
       "reprint" -> {
         starDeeplink(reprintDeeplink, Bundle())

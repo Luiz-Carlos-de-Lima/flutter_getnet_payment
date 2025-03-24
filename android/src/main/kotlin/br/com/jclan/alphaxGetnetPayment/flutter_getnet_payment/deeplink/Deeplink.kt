@@ -18,7 +18,6 @@ abstract class Deeplink {
                     "message" to "no intent data"
                 )
             }
-            Log.d("validateIntent", "$intent")
             val extras: Bundle? = intent.extras
 
             when (val status: String? = extras?.getString("result")) {

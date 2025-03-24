@@ -31,8 +31,7 @@ class PaymentDeeplink: Deeplink() {
             if (callerId == null) {
                 throw IllegalArgumentException("Invalid payment details: callerId")
             }
-
-
+            Log.d("currencyCode", "$currencyCode")
             val uriBuilder = Uri.Builder().apply {
                 scheme("getnet")
                 authority("pagamento")
@@ -42,8 +41,12 @@ class PaymentDeeplink: Deeplink() {
                 appendQueryParameter("amount", amount)
                 appendQueryParameter("callerId", callerId)
                 appendQueryParameter("orderId", orderId)
-                appendQueryParameter("currencyPosition", currencyPosition)
-                appendQueryParameter("currencyCode", currencyCode)
+                if (currencyPosition != null) {
+                    appendQueryParameter("currencyPosition", currencyPosition)
+                }
+                if (currencyCode != null) {
+                    appendQueryParameter("currencyCode", currencyCode)
+                }
                 appendQueryParameter("allowPrintCurrentTransaction", allowPrintCurrentTransaction.toString())
             }
 
