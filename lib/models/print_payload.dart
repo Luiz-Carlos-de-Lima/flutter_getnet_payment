@@ -6,10 +6,17 @@ class PrintPayload {
   PrintPayload({required this.printableContent});
 
   Map<String, dynamic> toJson() {
-    return {'printable_content': printableContent.map((e) => e.toJson()).toList()};
+    return {
+      'printable_content': printableContent.map((e) => e.toJson()).toList(),
+    };
   }
 
   static PrintPayload fromJson(Map json) {
-    return PrintPayload(printableContent: json['printable_content'].map<Contentprint>((e) => Contentprint.fromJson(e)).toList());
+    return PrintPayload(
+      printableContent:
+          json['printable_content']
+              .map<Contentprint>((e) => Contentprint.fromJson(e))
+              .toList(),
+    );
   }
 }
