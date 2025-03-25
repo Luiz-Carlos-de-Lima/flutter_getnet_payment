@@ -2,6 +2,7 @@ import 'package:flutter_getnet_payment/models/Info_response.dart';
 import 'package:flutter_getnet_payment/models/payment_payload.dart';
 import 'package:flutter_getnet_payment/models/payment_response.dart';
 import 'package:flutter_getnet_payment/models/pre_autorization_payload.dart';
+import 'package:flutter_getnet_payment/models/pre_autorization_response.dart';
 import 'package:flutter_getnet_payment/models/print_payload.dart';
 import 'package:flutter_getnet_payment/models/refund_response.dart';
 import 'package:flutter_getnet_payment/models/status_payment_payload.dart';
@@ -19,7 +20,7 @@ class FlutterGetnetPayment {
     return FlutterGetnetPaymentPlatform.instance.statusPayment(statusPaymentPayload: statusPaymentPayload);
   }
 
-  Future<void> preAutorization({required PreAutorizationPayload preAutorizationPayload}) {
+  Future<PreAutorizationResponse> preAutorization({required PreAutorizationPayload preAutorizationPayload}) {
     return FlutterGetnetPaymentPlatform.instance.preAutorization(preAutorizationPayload: preAutorizationPayload);
   }
 

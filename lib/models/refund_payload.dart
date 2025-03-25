@@ -1,5 +1,3 @@
-import 'package:intl/intl.dart';
-
 class RefundPayload {
   final double amount;
 

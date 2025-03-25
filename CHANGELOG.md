@@ -1,3 +1,4 @@
-## 0.0.1
+# 1.0.0
+* First release of the plugin.
 
-* TODO: Describe initial release.
+* Features: Payment, refund, pre-authorization, custom printing, last receipt reprint, and device information.
