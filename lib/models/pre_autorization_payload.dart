@@ -21,7 +21,10 @@ class PreAutorizationPayload {
     return PreAutorizationPayload(
       amount: int.parse(map['amount']) / 100,
       currencyPosition: map['currencyPosition'],
-      currecyCode: map['currecyCode'] != null ? (map['currecyCode'] as num).toInt() : 986,
+      currecyCode:
+          map['currecyCode'] != null
+              ? (map['currecyCode'] as num).toInt()
+              : 986,
       callerId: map['callerId'],
       allowPrintCurrentTransaction: map['allowPrintCurrentTransaction'],
       orderId: map['orderId'],

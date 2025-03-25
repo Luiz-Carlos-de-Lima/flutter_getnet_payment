@@ -18,7 +18,8 @@ abstract class FlutterGetnetPaymentPlatform extends PlatformInterface {
 
   static final Object _token = Object();
 
-  static FlutterGetnetPaymentPlatform _instance = MethodChannelFlutterGetnetPayment();
+  static FlutterGetnetPaymentPlatform _instance =
+      MethodChannelFlutterGetnetPayment();
 
   /// The default instance of [FlutterGetnetPaymentPlatform] to use.
   ///
@@ -37,11 +38,15 @@ abstract class FlutterGetnetPaymentPlatform extends PlatformInterface {
     throw UnimplementedError('platformVersion() has not been implemented.');
   }
 
-  Future<StatusPaymentResponse> statusPayment({required StatusPaymentPayload statusPaymentPayload}) async {
+  Future<StatusPaymentResponse> statusPayment({
+    required StatusPaymentPayload statusPaymentPayload,
+  }) async {
     throw UnimplementedError('statusPayment() has not been implemented.');
   }
 
-  Future<PreAutorizationResponse> preAutorization({required PreAutorizationPayload preAutorizationPayload}) {
+  Future<PreAutorizationResponse> preAutorization({
+    required PreAutorizationPayload preAutorizationPayload,
+  }) {
     throw UnimplementedError('preAutorization() has not been implemented.');
   }
 

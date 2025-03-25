@@ -1,6 +1,1 @@
-enum PaymentType {
-  credit,
-  debit,
-  voucher,
-  pix,
-}
+enum PaymentType { credit, debit, voucher, pix }

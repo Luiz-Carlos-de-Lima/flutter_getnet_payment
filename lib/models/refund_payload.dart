@@ -7,7 +7,13 @@ class RefundPayload {
   final String? originTerminal;
   final String? allowPrintCurrentTransaction;
 
-  RefundPayload({required this.amount, this.transactionDate, this.cvNumber, this.originTerminal, this.allowPrintCurrentTransaction});
+  RefundPayload({
+    required this.amount,
+    this.transactionDate,
+    this.cvNumber,
+    this.originTerminal,
+    this.allowPrintCurrentTransaction,
+  });
 
   static RefundPayload fromJson(Map<String, dynamic> map) {
     return RefundPayload(

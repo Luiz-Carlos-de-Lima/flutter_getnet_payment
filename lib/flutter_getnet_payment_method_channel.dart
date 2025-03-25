@@ -29,9 +29,14 @@ class MethodChannelFlutterGetnetPayment extends FlutterGetnetPaymentPlatform {
   @override
   Future<PaymentResponse> pay({required PaymentPayload paymentPayload}) async {
     try {
-      final response = await methodChannel.invokeMethod<Map>('pay', paymentPayload.toJson());
+      final response = await methodChannel.invokeMethod<Map>(
+        'pay',
+        paymentPayload.toJson(),
+      );
       if (response is Map) {
-        if ((response['code'] == StatusDeeplink.SUCCESS.name || response['code'] == StatusDeeplink.PENDING.name) && response['data'] is Map) {
+        if ((response['code'] == StatusDeeplink.SUCCESS.name ||
+                response['code'] == StatusDeeplink.PENDING.name) &&
+            response['data'] is Map) {
           final jsonData = response['data'];
           return PaymentResponse.fromJson(jsonData);
         } else {
@@ -50,11 +55,18 @@ class MethodChannelFlutterGetnetPayment extends FlutterGetnetPaymentPlatform {
   }
 
   @override
-  Future<StatusPaymentResponse> statusPayment({required StatusPaymentPayload statusPaymentPayload}) async {
+  Future<StatusPaymentResponse> statusPayment({
+    required StatusPaymentPayload statusPaymentPayload,
+  }) async {
     try {
-      final response = await methodChannel.invokeMethod<Map>('statusPayment', statusPaymentPayload.toJson());
+      final response = await methodChannel.invokeMethod<Map>(
+        'statusPayment',
+        statusPaymentPayload.toJson(),
+      );
       if (response is Map) {
-        if ((response['code'] == StatusDeeplink.SUCCESS.name || response['code'] == StatusDeeplink.PENDING.name) && response['data'] is Map) {
+        if ((response['code'] == StatusDeeplink.SUCCESS.name ||
+                response['code'] == StatusDeeplink.PENDING.name) &&
+            response['data'] is Map) {
           final jsonData = response['data'];
           return StatusPaymentResponse.fromJson(json: jsonData);
         } else {
@@ -73,11 +85,18 @@ class MethodChannelFlutterGetnetPayment extends FlutterGetnetPaymentPlatform {
   }
 
   @override
-  Future<PreAutorizationResponse> preAutorization({required PreAutorizationPayload preAutorizationPayload}) async {
+  Future<PreAutorizationResponse> preAutorization({
+    required PreAutorizationPayload preAutorizationPayload,
+  }) async {
     try {
-      final response = await methodChannel.invokeMethod<Map>('preAuthorization', preAutorizationPayload.toJson());
+      final response = await methodChannel.invokeMethod<Map>(
+        'preAuthorization',
+        preAutorizationPayload.toJson(),
+      );
       if (response is Map) {
-        if ((response['code'] == StatusDeeplink.SUCCESS.name || response['code'] == StatusDeeplink.PENDING.name) && response['data'] is Map) {
+        if ((response['code'] == StatusDeeplink.SUCCESS.name ||
+                response['code'] == StatusDeeplink.PENDING.name) &&
+            response['data'] is Map) {
           final jsonData = response['data'];
           return PreAutorizationResponse.fromJson(json: jsonData);
         } else {
@@ -101,7 +120,9 @@ class MethodChannelFlutterGetnetPayment extends FlutterGetnetPaymentPlatform {
       final refund = refundPayload.toJson();
       final response = await methodChannel.invokeMethod<Map>('refund', refund);
       if (response is Map) {
-        if ((response['code'] == StatusDeeplink.SUCCESS.name || response['code'] == StatusDeeplink.PENDING.name) && response['data'] is Map) {
+        if ((response['code'] == StatusDeeplink.SUCCESS.name ||
+                response['code'] == StatusDeeplink.PENDING.name) &&
+            response['data'] is Map) {
           final jsonData = response['data'];
           return RefundResponse.fromJson(json: jsonData);
         } else {
@@ -122,7 +143,10 @@ class MethodChannelFlutterGetnetPayment extends FlutterGetnetPaymentPlatform {
   @override
   Future<void> print({required PrintPayload printPayload}) async {
     try {
-      final response = await methodChannel.invokeMethod<Map>('print', printPayload.toJson());
+      final response = await methodChannel.invokeMethod<Map>(
+        'print',
+        printPayload.toJson(),
+      );
 
       if (response is Map) {
         if (response['code'] != StatusDeeplink.SUCCESS.name) {
@@ -165,7 +189,9 @@ class MethodChannelFlutterGetnetPayment extends FlutterGetnetPaymentPlatform {
     try {
       final response = await methodChannel.invokeMethod<Map>('info');
       if (response is Map) {
-        if ((response['code'] == StatusDeeplink.SUCCESS.name || response['code'] == StatusDeeplink.PENDING.name) && response['data'] is Map) {
+        if ((response['code'] == StatusDeeplink.SUCCESS.name ||
+                response['code'] == StatusDeeplink.PENDING.name) &&
+            response['data'] is Map) {
           final jsonData = response['data'];
           return InfoResponse.fromJson(json: jsonData);
         } else {

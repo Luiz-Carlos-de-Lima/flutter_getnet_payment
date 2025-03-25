@@ -13,23 +13,37 @@ import 'models/refund_payload.dart';
 
 class FlutterGetnetPayment {
   Future<PaymentResponse> pay({required PaymentPayload paymentPayload}) {
-    return FlutterGetnetPaymentPlatform.instance.pay(paymentPayload: paymentPayload);
+    return FlutterGetnetPaymentPlatform.instance.pay(
+      paymentPayload: paymentPayload,
+    );
   }
 
-  Future<StatusPaymentResponse> statusPayment({required StatusPaymentPayload statusPaymentPayload}) async {
-    return FlutterGetnetPaymentPlatform.instance.statusPayment(statusPaymentPayload: statusPaymentPayload);
+  Future<StatusPaymentResponse> statusPayment({
+    required StatusPaymentPayload statusPaymentPayload,
+  }) async {
+    return FlutterGetnetPaymentPlatform.instance.statusPayment(
+      statusPaymentPayload: statusPaymentPayload,
+    );
   }
 
-  Future<PreAutorizationResponse> preAutorization({required PreAutorizationPayload preAutorizationPayload}) {
-    return FlutterGetnetPaymentPlatform.instance.preAutorization(preAutorizationPayload: preAutorizationPayload);
+  Future<PreAutorizationResponse> preAutorization({
+    required PreAutorizationPayload preAutorizationPayload,
+  }) {
+    return FlutterGetnetPaymentPlatform.instance.preAutorization(
+      preAutorizationPayload: preAutorizationPayload,
+    );
   }
 
   Future<RefundResponse> refund({required RefundPayload refundPayload}) {
-    return FlutterGetnetPaymentPlatform.instance.refund(refundPayload: refundPayload);
+    return FlutterGetnetPaymentPlatform.instance.refund(
+      refundPayload: refundPayload,
+    );
   }
 
   Future<void> print({required PrintPayload printPayload}) {
-    return FlutterGetnetPaymentPlatform.instance.print(printPayload: printPayload);
+    return FlutterGetnetPaymentPlatform.instance.print(
+      printPayload: printPayload,
+    );
   }
 
   Future<void> reprint() {
