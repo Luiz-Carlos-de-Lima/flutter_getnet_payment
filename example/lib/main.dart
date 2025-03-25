@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:math';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_getnet_payment/constants/credit_type.dart';
 import 'package:flutter_getnet_payment/constants/payment_type.dart';
@@ -86,8 +87,7 @@ class PaymentApp extends StatelessWidget {
                 child: ElevatedButton(
                   onPressed: () async {
                     try {
-                      final info = await flutterGetnetPaymentPlugin.reprint();
-
+                      await flutterGetnetPaymentPlugin.reprint();
                       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Reimpressão realizada com sucesso!")));
                     } on InfoException catch (e) {
                       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.message)));
@@ -135,7 +135,7 @@ class PaymentApp extends StatelessWidget {
 }
 
 class _PaymentPage extends StatefulWidget {
-  const _PaymentPage({super.key});
+  const _PaymentPage();
 
   @override
   State<_PaymentPage> createState() => _PaymentPageState();
@@ -308,7 +308,7 @@ class _PaymentPageState extends State<_PaymentPage> {
 }
 
 class _PreAutorizationPage extends StatefulWidget {
-  const _PreAutorizationPage({super.key});
+  const _PreAutorizationPage();
 
   @override
   State<_PreAutorizationPage> createState() => _PreAutorizationPageState();
@@ -378,7 +378,7 @@ class _PreAutorizationPageState extends State<_PreAutorizationPage> {
                         );
                         final response = await flutterGetnetPaymentPlugin.preAutorization(preAutorizationPayload: preAutorization);
 
-                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Simulacao pre autorização ")));
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Simulacao pre autorização ${response.toJson().toString()}")));
                       } on PaymentException catch (e) {
                         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.message)));
                       } on PrintException catch (e) {
@@ -403,7 +403,7 @@ class _PreAutorizationPageState extends State<_PreAutorizationPage> {
 }
 
 class _CancelPage extends StatefulWidget {
-  const _CancelPage({super.key});
+  const _CancelPage();
 
   @override
   State<_CancelPage> createState() => _CancelPageState();
@@ -495,10 +495,10 @@ class _CancelPageState extends State<_CancelPage> {
                                     int.parse(second), // Segundo
                                   );
 
-                                  final twoDigits = (int n) {
+                                  twoDigits(int n) {
                                     if (n >= 10) return "$n";
                                     return "0$n";
-                                  };
+                                  }
 
                                   formattedDate = "${twoDigits(date.day)}/${twoDigits(date.month)}/${twoDigits(date.year)}";
                                 }
@@ -513,7 +513,9 @@ class _CancelPageState extends State<_CancelPage> {
 
                                 final response = await flutterGetnetPaymentPlugin.refund(refundPayload: refundPayload);
 
-                                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Simulacao Estorno realizada com sucesso!")));
+                                ScaffoldMessenger.of(
+                                  context,
+                                ).showSnackBar(SnackBar(content: Text("Simulacao Estorno realizada com sucesso! ${response.toJson()}")));
                               } on RefundException catch (e) {
                                 ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.message)));
                               } on PrintException catch (e) {
@@ -539,7 +541,7 @@ class _CancelPageState extends State<_CancelPage> {
 }
 
 class _PrintPage extends StatefulWidget {
-  const _PrintPage({super.key});
+  const _PrintPage();
 
   @override
   State<_PrintPage> createState() => _PrintPageState();
@@ -717,7 +719,9 @@ class _PrintPageState extends State<_PrintPage> {
         return base64Encode(response.bodyBytes);
       }
     } catch (e) {
-      print("Erro ao converter imagem para Base64: $e");
+      if (kDebugMode) {
+        print("Erro ao converter imagem para Base64: $e");
+      }
     }
     return null;
   }
