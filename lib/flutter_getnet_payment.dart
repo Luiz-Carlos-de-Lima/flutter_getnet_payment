@@ -1,4 +1,4 @@
-import 'package:flutter_getnet_payment/models/Info_response.dart';
+import 'package:flutter_getnet_payment/models/info_response.dart';
 import 'package:flutter_getnet_payment/models/payment_payload.dart';
 import 'package:flutter_getnet_payment/models/payment_response.dart';
 import 'package:flutter_getnet_payment/models/pre_autorization_payload.dart';
