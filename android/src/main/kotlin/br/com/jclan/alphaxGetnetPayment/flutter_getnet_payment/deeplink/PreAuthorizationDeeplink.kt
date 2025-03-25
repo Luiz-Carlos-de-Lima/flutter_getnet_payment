@@ -5,7 +5,7 @@ import android.net.Uri
 import android.os.Bundle
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
 
-class PreAuthorization: Deeplink() {
+class PreAuthorizationDeeplink: Deeplink() {
     companion object {
         const val REQUEST_CODE = 10003
     }
@@ -14,7 +14,7 @@ class PreAuthorization: Deeplink() {
         try {
             val amount: String? = bundle.getString("amount")
             val currencyPosition: String? = bundle.getString("currencyPosition")
-            val currencyCode: String = bundle.getString("currencyCode") ?: "986"
+            val currencyCode: Int = bundle.getInt("currencyCode")
             val callerId: String? = bundle.getString("callerId")
             val allowPrintCurrentTransaction: Boolean = bundle.getBoolean("allowPrintCurrentTransaction") ?: false
             val orderId: String? = bundle.getString("orderId")
@@ -30,7 +30,6 @@ class PreAuthorization: Deeplink() {
                 throw IllegalArgumentException("Invalid pre authorization details: callerId")
             }
 
-
             val uriBuilder = Uri.Builder().apply {
                 scheme("getnet")
                 authority("pagamento")
@@ -38,7 +37,7 @@ class PreAuthorization: Deeplink() {
                 appendPath("pre-authorization")
                 appendQueryParameter("amount", amount)
                 appendQueryParameter("currencyPosition", currencyPosition)
-                appendQueryParameter("currencyCode", currencyCode)
+                appendQueryParameter("currencyCode", currencyCode.toString())
                 appendQueryParameter("callerId", callerId)
                 appendQueryParameter("allowPrintCurrentTransaction", allowPrintCurrentTransaction.toString())
                 appendQueryParameter("orderId", orderId)
@@ -46,7 +45,7 @@ class PreAuthorization: Deeplink() {
 
             val paymentIntent = Intent(Intent.ACTION_VIEW)
             paymentIntent.data = uriBuilder.build()
-            binding.activity.startActivityForResult(paymentIntent, PreAuthorization.REQUEST_CODE)
+            binding.activity.startActivityForResult(paymentIntent, REQUEST_CODE)
 
             return Bundle().apply {
                 putString("code", "SUCCESS")
@@ -62,9 +61,5 @@ class PreAuthorization: Deeplink() {
                 putString("message", e.message ?: "An unexpected error occurred")
             }
         }
-    }
-
-    override fun validateIntent(intent: Intent?): Map<String, Any?> {
-        TODO("Not yet implemented")
     }
 }

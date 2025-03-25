@@ -3,6 +3,7 @@ package br.com.jclan.alphaxGetnetPayment.flutter_getnet_payment
 import android.os.Bundle
 import android.app.Activity
 import android.content.Intent
+
 import android.util.Log
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.activity.ActivityAware
@@ -12,10 +13,13 @@ import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
 import br.com.jclan.alphaxGetnetPayment.flutter_getnet_payment.deeplink.Deeplink
+import br.com.jclan.alphaxGetnetPayment.flutter_getnet_payment.deeplink.InfoDeeplink
 import br.com.jclan.alphaxGetnetPayment.flutter_getnet_payment.deeplink.PaymentDeeplink
-import br.com.jclan.alphaxGetnetPayment.flutter_getnet_payment.deeplink.PreAuthorization
+import br.com.jclan.alphaxGetnetPayment.flutter_getnet_payment.deeplink.PreAuthorizationDeeplink
 import br.com.jclan.alphaxGetnetPayment.flutter_getnet_payment.deeplink.RefundDeeplink
+import br.com.jclan.alphaxGetnetPayment.flutter_getnet_payment.deeplink.ReprintDeeplink
 import br.com.jclan.alphaxGetnetPayment.flutter_getnet_payment.deeplink.StatusDeeplink
+import br.com.jclan.alphaxGetnetPayment.flutter_getnet_payment.services.PrintService
 import com.getnet.posdigital.PosDigital
 
 class FlutterGetnetPaymentPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
@@ -23,7 +27,9 @@ class FlutterGetnetPaymentPlugin: FlutterPlugin, MethodCallHandler, ActivityAwar
   private val paymentDeeplink = PaymentDeeplink()
   private val statusDeeplink = StatusDeeplink()
   private val refundDeeplink = RefundDeeplink()
-  private val preAuthorization = PreAuthorization()
+  private val preAuthorizationDeeplink = PreAuthorizationDeeplink()
+  private val reprintDeeplink = ReprintDeeplink()
+  private val infoDeeplink = InfoDeeplink()
   private var binding: ActivityPluginBinding? = null
   private var resultScope: Result? = null
 
@@ -46,11 +52,17 @@ class FlutterGetnetPaymentPlugin: FlutterPlugin, MethodCallHandler, ActivityAwar
             StatusDeeplink.REQUEST_CODE -> {
               responseMap = statusDeeplink.validateIntent(intent)
             }
-            PreAuthorization.REQUEST_CODE -> {
-              responseMap = preAuthorization.validateIntent(intent)
+            PreAuthorizationDeeplink.REQUEST_CODE -> {
+              responseMap = preAuthorizationDeeplink.validateIntent(intent)
             }
             RefundDeeplink.REQUEST_CODE -> {
               responseMap = refundDeeplink.validateIntent(intent)
+            }
+            ReprintDeeplink.REQUEST_CODE -> {
+              responseMap = reprintDeeplink.validateIntent(intent)
+            }
+            InfoDeeplink.REQUEST_CODE -> {
+              responseMap = infoDeeplink.validateIntent(intent)
             }
         }
 
@@ -101,10 +113,13 @@ class FlutterGetnetPaymentPlugin: FlutterPlugin, MethodCallHandler, ActivityAwar
       "pay" -> {
         val bundle = Bundle().apply {
           putString("amount", call.argument<String>("amount"))
+          putString("currencyPosition", call.argument<String>("currencyPosition"))
+          putInt("currencyCode", call.argument<Int>("currencyCode") ?: 986)
           putString("paymentType", call.argument<String>("paymentType"))
           putString("callerId", call.argument<String>("callerId"))
           putString("creditType", call.argument<String>("creditType"))
-          putString("installments", call.argument<String>("installments"))
+          putInt("installments", call.argument<Int>("installments") ?: 0)
+          putBoolean("allowPrintCurrentTransaction", call.argument<Boolean>("allowPrintCurrentTransaction") ?: false)
         }
         starDeeplink(paymentDeeplink, bundle)
       }
@@ -119,12 +134,12 @@ class FlutterGetnetPaymentPlugin: FlutterPlugin, MethodCallHandler, ActivityAwar
         val bundle = Bundle().apply {
           putString("amount", call.argument<String>("amount"))
           putString("currencyPosition", call.argument<String>("currencyPosition"))
-          putString("currencyCode", call.argument<String>("currencyCode"))
+          putInt("currencyCode", call.argument<Int>("currencyCode") ?: 986)
           putString("callerId", call.argument<String>("callerId"))
           putBoolean("allowPrintCurrentTransaction", call.argument<Boolean>("allowPrintCurrentTransaction") ?: false)
           putString("orderId", call.argument<String>("orderId"))
         }
-        starDeeplink(preAuthorization, bundle)
+        starDeeplink(preAuthorizationDeeplink, bundle)
       }
       "refund" -> {
         val bundle = Bundle().apply {
@@ -136,13 +151,27 @@ class FlutterGetnetPaymentPlugin: FlutterPlugin, MethodCallHandler, ActivityAwar
         }
         starDeeplink(refundDeeplink, bundle)
       }
+      "print" -> {
+        val listPrintContent: List<HashMap<String, Any?>>? = call.argument<List<HashMap<String, Any?>>>("printable_content")
+        val bundleResult = PrintService().start(listPrintContent?.toBundleList())
+
+        if (bundleResult.getString("code") == "SUCCESS") {
+          val data: Map<String, Any?> = mapOf(
+            "code" to "SUCCESS",
+            "message" to bundleResult.getString("message")
+          )
+          resultScope?.success(data)
+        } else {
+          val message: String = (bundleResult.getString("message") ?: "result error").toString()
+          resultScope?.error((bundleResult.getString("code") ?: "ERROR").toString(), message, null)
+          resultScope = null
+        }
+      }
       "reprint" -> {
-//        val bundle = Bundle().apply {
-//          putBoolean("show_feedback_screen", call.argument<Boolean>("show_feedback_screen") ?: false)
-//          putString("atk", call.argument<String>("atk"))
-//          putString("type_customer", call.argument<String>("type_customer"))
-//        }
-//        starDeeplink(reprintDeeplink, bundle)
+        starDeeplink(reprintDeeplink, Bundle())
+      }
+      "info" -> {
+        starDeeplink(infoDeeplink, Bundle())
       }
       else ->  {
         resultScope?.error("ERROR", "Value of ", null)
@@ -209,8 +238,12 @@ class FlutterGetnetPaymentPlugin: FlutterPlugin, MethodCallHandler, ActivityAwar
           PosDigital.unregister(binding!!.activity)
         connectPosDigitalService()
       }
-      override fun onConnected() {}
-      override fun onDisconnected() {}
+      override fun onConnected() {
+        Log.d("Register PosDigital","PosDigital connected successfully!")
+      }
+      override fun onDisconnected() {
+        Log.d("Register PosDigital","PosDigital disconnected!")
+      }
     }
 
   private fun connectPosDigitalService() {

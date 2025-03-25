@@ -17,7 +17,10 @@ class PaymentDeeplink: Deeplink() {
             val paymentType: String? = bundle.getString("paymentType")
             val amount: String? = bundle.getString("amount")
             val callerId: String? = bundle.getString("callerId")
+            val currencyPosition: String? = bundle.getString("currencyPosition")
+            val currencyCode: Int = bundle.getInt("currencyCode")
             val orderId: String? = bundle.getString("orderId")
+            val allowPrintCurrentTransaction: Boolean = bundle.getBoolean("allowPrintCurrentTransaction") ?: false
 
             if ((paymentType.equals("credit") || paymentType.equals("debit") || paymentType.equals("voucher") || paymentType.equals("pix")).not()) {
                 throw IllegalArgumentException("Invalid payment details: paymentType")
@@ -28,8 +31,7 @@ class PaymentDeeplink: Deeplink() {
             if (callerId == null) {
                 throw IllegalArgumentException("Invalid payment details: callerId")
             }
-
-
+            Log.d("currencyCode", "$currencyCode")
             val uriBuilder = Uri.Builder().apply {
                 scheme("getnet")
                 authority("pagamento")
@@ -39,19 +41,27 @@ class PaymentDeeplink: Deeplink() {
                 appendQueryParameter("amount", amount)
                 appendQueryParameter("callerId", callerId)
                 appendQueryParameter("orderId", orderId)
+                if (currencyPosition != null) {
+                    appendQueryParameter("currencyPosition", currencyPosition)
+                }
+                if (currencyCode > 0) {
+                    appendQueryParameter("currencyCode", currencyCode.toString())
+                }
+                appendQueryParameter("allowPrintCurrentTransaction", allowPrintCurrentTransaction.toString())
             }
 
             if (paymentType.equals("credit")) {
                 val creditType: String? = bundle.getString("creditType")
-                val installments: String? = bundle.getString("installments")
-                if ((creditType.equals("creditMerchant") || creditType.equals("creditIssuer")).not()) {
-                    throw IllegalArgumentException("Invalid payment details of paymentType.credit: the value of creditType cannot different 'creditMerchant' or 'creditIssuer'")
+                val installments: Int = bundle.getInt("installments", 0)
+                Log.d("creditType", creditType.toString())
+                if ((creditType.equals("creditMerchant") || creditType.equals("creditIssuer")) && installments <= 1) {
+                    throw IllegalArgumentException("Installments cannot be null and must be greater than 1 when paymentType is 'credit' and creditType is 'creditMerchant' or 'creditIssuer'")
                 }
-                if (installments == null) {
-                    throw IllegalArgumentException("Invalid payment details of paymentType.credit: the value of 'installments' cannot null")
+
+                if (creditType != null) {
+                    uriBuilder.appendQueryParameter("creditType", creditType)
+                    uriBuilder.appendQueryParameter("installments", installments.toString())
                 }
-                uriBuilder.appendQueryParameter("creditType", creditType)
-                uriBuilder.appendQueryParameter("installments", installments)
             }
 
             val paymentIntent = Intent(Intent.ACTION_VIEW)
