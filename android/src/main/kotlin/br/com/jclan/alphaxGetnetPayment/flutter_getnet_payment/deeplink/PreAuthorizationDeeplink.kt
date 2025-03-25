@@ -14,7 +14,7 @@ class PreAuthorizationDeeplink: Deeplink() {
         try {
             val amount: String? = bundle.getString("amount")
             val currencyPosition: String? = bundle.getString("currencyPosition")
-            val currencyCode: String = bundle.getString("currencyCode") ?: "986"
+            val currencyCode: Int = bundle.getInt("currencyCode")
             val callerId: String? = bundle.getString("callerId")
             val allowPrintCurrentTransaction: Boolean = bundle.getBoolean("allowPrintCurrentTransaction") ?: false
             val orderId: String? = bundle.getString("orderId")
@@ -30,7 +30,6 @@ class PreAuthorizationDeeplink: Deeplink() {
                 throw IllegalArgumentException("Invalid pre authorization details: callerId")
             }
 
-
             val uriBuilder = Uri.Builder().apply {
                 scheme("getnet")
                 authority("pagamento")
@@ -38,7 +37,7 @@ class PreAuthorizationDeeplink: Deeplink() {
                 appendPath("pre-authorization")
                 appendQueryParameter("amount", amount)
                 appendQueryParameter("currencyPosition", currencyPosition)
-                appendQueryParameter("currencyCode", currencyCode)
+                appendQueryParameter("currencyCode", currencyCode.toString())
                 appendQueryParameter("callerId", callerId)
                 appendQueryParameter("allowPrintCurrentTransaction", allowPrintCurrentTransaction.toString())
                 appendQueryParameter("orderId", orderId)

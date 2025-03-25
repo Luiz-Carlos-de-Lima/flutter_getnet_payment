@@ -3,7 +3,7 @@ import 'package:flutter_getnet_payment/constants/currency_position.dart';
 class PreAutorizationPayload {
   final double amount;
   final CurrencyPosition currencyPosition;
-  final String currecyCode;
+  final int currecyCode;
   final String callerId;
   final String? allowPrintCurrentTransaction;
   final String orderId;
@@ -11,7 +11,7 @@ class PreAutorizationPayload {
   PreAutorizationPayload({
     required this.amount,
     this.currencyPosition = CurrencyPosition.CURRENCY_BEFORE_AMOUNT,
-    this.currecyCode = "986",
+    this.currecyCode = 986,
     required this.callerId,
     this.allowPrintCurrentTransaction,
     required this.orderId,
@@ -21,7 +21,7 @@ class PreAutorizationPayload {
     return PreAutorizationPayload(
       amount: int.parse(map['amount']) / 100,
       currencyPosition: map['currencyPosition'],
-      currecyCode: map['currecyCode'],
+      currecyCode: map['currecyCode'] != null ? (map['currecyCode'] as num).toInt() : 986,
       callerId: map['callerId'],
       allowPrintCurrentTransaction: map['allowPrintCurrentTransaction'],
       orderId: map['orderId'],

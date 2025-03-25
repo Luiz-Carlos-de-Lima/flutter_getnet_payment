@@ -114,11 +114,11 @@ class FlutterGetnetPaymentPlugin: FlutterPlugin, MethodCallHandler, ActivityAwar
         val bundle = Bundle().apply {
           putString("amount", call.argument<String>("amount"))
           putString("currencyPosition", call.argument<String>("currencyPosition"))
-          putString("currencyCode", call.argument<String>("currencyCode"))
+          putInt("currencyCode", call.argument<Int>("currencyCode") ?: 986)
           putString("paymentType", call.argument<String>("paymentType"))
           putString("callerId", call.argument<String>("callerId"))
           putString("creditType", call.argument<String>("creditType"))
-          putString("installments", call.argument<String>("installments"))
+          putInt("installments", call.argument<Int>("installments") ?: 0)
           putBoolean("allowPrintCurrentTransaction", call.argument<Boolean>("allowPrintCurrentTransaction") ?: false)
         }
         starDeeplink(paymentDeeplink, bundle)
@@ -134,7 +134,7 @@ class FlutterGetnetPaymentPlugin: FlutterPlugin, MethodCallHandler, ActivityAwar
         val bundle = Bundle().apply {
           putString("amount", call.argument<String>("amount"))
           putString("currencyPosition", call.argument<String>("currencyPosition"))
-          putString("currencyCode", call.argument<String>("currencyCode"))
+          putInt("currencyCode", call.argument<Int>("currencyCode") ?: 986)
           putString("callerId", call.argument<String>("callerId"))
           putBoolean("allowPrintCurrentTransaction", call.argument<Boolean>("allowPrintCurrentTransaction") ?: false)
           putString("orderId", call.argument<String>("orderId"))
@@ -238,8 +238,12 @@ class FlutterGetnetPaymentPlugin: FlutterPlugin, MethodCallHandler, ActivityAwar
           PosDigital.unregister(binding!!.activity)
         connectPosDigitalService()
       }
-      override fun onConnected() {}
-      override fun onDisconnected() {}
+      override fun onConnected() {
+        Log.d("Register PosDigital","PosDigital connected successfully!")
+      }
+      override fun onDisconnected() {
+        Log.d("Register PosDigital","PosDigital disconnected!")
+      }
     }
 
   private fun connectPosDigitalService() {

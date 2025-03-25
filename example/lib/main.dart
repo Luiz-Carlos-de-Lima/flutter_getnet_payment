@@ -554,7 +554,7 @@ class _PrintPageState extends State<_PrintPage> {
 
   PrintType _printType = PrintType.line;
   PrintAlign? _printAlign = PrintAlign.center;
-  PrintSize? _printSize = PrintSize.medium;
+  PrintSize _printSize = PrintSize.medium;
 
   @override
   void initState() {
@@ -590,8 +590,8 @@ class _PrintPageState extends State<_PrintPage> {
                           _printAlign = PrintAlign.center;
                           _printSize = PrintSize.medium;
                         } else {
-                          _printAlign = null;
-                          _printSize = null;
+                          _printAlign = PrintAlign.left;
+                          _printSize = PrintSize.medium;
                         }
                         setState(() {});
                       },
