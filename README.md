@@ -1,7 +1,7 @@
 <h1 align="center">Flutter Getnet Payment</h1>
 
 <div align="center" id="top">
-  <img src="https://site.getnet.com.br/wp-content/uploads/2021/08/logo-getnet.png" alt="Getnet" height=30 style="margin: 20px 0px 10px 0px;" />
+  <img src="https://site.getnet.com.br/wp-content/uploads/2021/08/logo-getnet.png" alt="Getnet" height=30 style="margin: 20px 0px 0px 0px;" />
 </div>
 
 ## Plugin não oficial
