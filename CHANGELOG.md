@@ -10,3 +10,7 @@
 # 1.0.2
 
 * removing unused dependencies
+
+# 1.1.0
+
+* rename files and class
