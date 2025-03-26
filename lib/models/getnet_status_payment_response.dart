@@ -1,9 +1,9 @@
-import 'package:flutter_getnet_payment/models/payment_response.dart';
+import 'package:flutter_getnet_payment/models/getnet_payment_response.dart';
 
-class StatusPaymentResponse extends PaymentResponse {
+class GetnetStatusPaymentResponse extends GetnetPaymentResponse {
   final bool? refunded;
 
-  StatusPaymentResponse({
+  GetnetStatusPaymentResponse({
     required super.result,
     super.resultDetails,
     required super.amount,
@@ -31,8 +31,8 @@ class StatusPaymentResponse extends PaymentResponse {
     this.refunded = false,
   });
 
-  static StatusPaymentResponse fromJson({required Map json}) {
-    return StatusPaymentResponse(
+  static GetnetStatusPaymentResponse fromJson({required Map json}) {
+    return GetnetStatusPaymentResponse(
       result: json['result'],
       resultDetails: json['resultDetails'],
       amount: json['amount'],

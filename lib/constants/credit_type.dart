@@ -1,1 +1,0 @@
-enum CreditType { creditMerchant, creditIssuer }

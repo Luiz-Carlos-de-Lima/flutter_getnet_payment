@@ -88,7 +88,7 @@ final response = await _flutterGetnetPaymentPlugin.info();
 
 ## Enums Disponíveis
 
-### `PaymentType`
+### `GetnetPaymentType`
 
 Define os tipos de transação disponíveis:
 
@@ -100,15 +100,15 @@ Define os tipos de transação disponíveis:
 
 * `pix` - Transação via PIX.
 
-### `CreditType`
+### `GetnetCreditType`
 
-Utilizado apenas quando `PaymentType.credit`.
+Utilizado apenas quando `GetnetPaymentType.credit`.
 
 * `creditMerchant` - Crédito parcelado Lojista.
 
 * `creditIssuer` - Crédito parcelado Emissor.
 
-### `PrintType`
+### `GetnetPrintType`
 
 Define os tipos de impressão disponíveis:
 
@@ -118,9 +118,9 @@ Define os tipos de impressão disponíveis:
 
 * `image` - Impressão de imagem.
 
-* `PrintAlign`
+* `GetnetPrintAlign`
 
-Define o alinhamento do conteúdo impresso na instância de ContentPrint, Utilizado apenas quando `PrintType.text`:
+Define o alinhamento do conteúdo impresso na instância de ContentPrint, Utilizado apenas quando `GetnetPrintType.text`:
 
 * `center` - Centralizado.
 
@@ -128,10 +128,10 @@ Define o alinhamento do conteúdo impresso na instância de ContentPrint, Utiliz
 
 * `left` - Alinhado à esquerda.
 
-* `PrintSize`
+* `GetnetPrintSize`
 
 Define o tamanho do texto impresso na instância de ContentPrint:
-Utilizado apenas quando `PrintType.text`:
+Utilizado apenas quando `GetnetPrintType.text`:
 
 * `big` - Grande.
 
@@ -142,45 +142,45 @@ Utilizado apenas quando `PrintType.text`:
 ## Exceptions
 
 ```dart	
-PaymentException() // Exceção lançada quando ocorre algum erro na execução do método pay.
-StatusPaymentException() // Exceção lançada quando ocorre algum erro na execução do método statusPayment.
-PreAutorizationException() // Exceção lançada quando ocorre algum erro na execução do método preAutorization.
-RefundException() // Exceção lançada quando ocorre algum erro na execução do método refund.
-PrintException() // Exceção lançada quando ocorre algum erro na execução do método print.
-ReprintException() // Exceção lançada quando ocorre algum erro na execução do método reprint.
-InfoException() // Exceção lançada quando ocorre algum erro na execução do método info.
+GetnetPaymentException() // Exceção lançada quando ocorre algum erro na execução do método pay.
+GetnetStatusPaymentException() // Exceção lançada quando ocorre algum erro na execução do método statusPayment.
+GetnetPreAutorizationException() // Exceção lançada quando ocorre algum erro na execução do método preAutorization.
+GetnetRefundException() // Exceção lançada quando ocorre algum erro na execução do método refund.
+GetnetPrintException() // Exceção lançada quando ocorre algum erro na execução do método print.
+GetnetReprintException() // Exceção lançada quando ocorre algum erro na execução do método reprint.
+GetnetInfoException() // Exceção lançada quando ocorre algum erro na execução do método info.
 ```
 ## Método `pay`
 
-No método `pay`, é necessário criar uma instância do tipo `PaymentPayload` com os seguintes parâmetros:
+No método `pay`, é necessário criar uma instância do tipo `GetnetPaymentPayload` com os seguintes parâmetros:
 
 ```dart	
-final payment = PaymentPayload(
+final payment = GetnetPaymentPayload(
     amount: 150.00,
-      paymentType: PaymentType.credit,
-      creditType: CreditType.creditMerchant,
+      paymentType: GetnetPaymentType.credit,
+      creditType: GetnetCreditType.creditMerchant,
       installments: 3,
       callerId: Random().nextInt(1000).toString(),
       orderId: Random().nextInt(1000).toString(),
     );
 ```
 
-A estrutura de `PaymentPayload` é a seguinte:
+A estrutura de `GetnetPaymentPayload` é a seguinte:
 
 ```dart
-class PaymentPayload {
+class GetnetPaymentPayload {
   final String callerId;
-  final CurrencyPosition currencyPosition;
+  final GetnetCurrencyPosition currencyPosition;
   final int currencyCode;
-  final PaymentType paymentType;
-  final CreditType? creditType;
+  final GetnetPaymentType paymentType;
+  final GetnetCreditType? creditType;
   final int? installments;
   final double amount;
   final String orderId;
 
-  PaymentPayload({
+  GetnetPaymentPayload({
     required this.paymentType,
-    this.currencyPosition = CurrencyPosition.CURRENCY_BEFORE_AMOUNT,
+    this.currencyPosition = GetnetCurrencyPosition.CURRENCY_BEFORE_AMOUNT,
     this.currencyCode = 986,
     this.creditType,
     this.installments,
@@ -188,18 +188,18 @@ class PaymentPayload {
     required this.callerId,
     required this.orderId,
   }) : assert(
-         paymentType != PaymentType.credit || creditType == null || (installments != null && installments > 1),
+         paymentType != GetnetPaymentType.credit || creditType == null || (installments != null && installments > 1),
          "Installments cannot be null and must be greater than 1 when paymentType is 'credit' and creditType is 'creditMerchant' or 'creditIssuer'.",
        ),
        assert(callerId.length <= 50, 'callerId size must be less than or equal to 50 characters'),
        assert(orderId.length <= 50, 'orderId size must be less than or equal to 50 characters');
 
-  static PaymentPayload fromJson(Map map) {
-    return PaymentPayload(
-      paymentType: PaymentType.values.byName(map['paymentType']),
-      currencyPosition: CurrencyPosition.values.byName(map['currencyPosition']),
+  static GetnetPaymentPayload fromJson(Map map) {
+    return GetnetPaymentPayload(
+      paymentType: GetnetPaymentType.values.byName(map['paymentType']),
+      currencyPosition: GetnetCurrencyPosition.values.byName(map['currencyPosition']),
       currencyCode: map['currencyCode'] != null ? (map['currencyCode'] as num).toInt() : 986,
-      creditType: map['creditType'] != null ? CreditType.values.byName(map['creditType']) : null,
+      creditType: map['creditType'] != null ? GetnetCreditType.values.byName(map['creditType']) : null,
       installments: map['installments'] != null ? (map['installments'] as num).toInt() : null,
       amount: (map['amount'] as num).toDouble(),
       callerId: map['callerId'],
@@ -223,18 +223,18 @@ class PaymentPayload {
 
 ```
 
-Caso o atributo `paymentType` for igual a `PaymentType.credit`, você pode informar o atributo `creditType` e `installments`.
+Caso o atributo `paymentType` for igual a `GetnetPaymentType.credit`, você pode informar o atributo `creditType` e `installments`.
 
 se o `creditType` não for informado, vai ser considerado como pagamento à vista.
 
-se o `creditType` for igual a `CreditType.creditMerchant` ou `CreditType.creditIssuer`, você deve informar o atributo `installments` onde ele deve ser maior que 1.
+se o `creditType` for igual a `GetnetCreditType.creditMerchant` ou `GetnetCreditType.creditIssuer`, você deve informar o atributo `installments` onde ele deve ser maior que 1.
 
 ## Resposta do Pagamento
 
-Caso a transação seja bem-sucedida, o retorno será uma instância do tipo `PaymentResponse` com a seguinte estrutura, Caso contrário, vai ser lançado uma exceção do tipo `PaymentException`.
+Caso a transação seja bem-sucedida, o retorno será uma instância do tipo `GetnetPaymentResponse` com a seguinte estrutura, Caso contrário, vai ser lançado uma exceção do tipo `GetnetPaymentException`.
 
 ```dart
-class PaymentResponse {
+class GetnetPaymentResponse {
   final String result;
   final String? resultDetails;
   final double amount;
@@ -260,7 +260,7 @@ class PaymentResponse {
   final String? orderId;
   final String? pixPayloadResponse;
 
-  PaymentResponse({
+  GetnetPaymentResponse({
     required this.result,
     this.resultDetails,
     required this.amount,
@@ -287,8 +287,8 @@ class PaymentResponse {
     this.pixPayloadResponse,
   });
 
-  static PaymentResponse fromJson(Map map) {
-    return PaymentResponse(
+  static GetnetPaymentResponse fromJson(Map map) {
+    return GetnetPaymentResponse(
       result: map['result'],
       resultDetails: map['resultDetails'],
       amount: int.parse(map['amount']) / 100,
@@ -349,32 +349,32 @@ class PaymentResponse {
 
 ## Método `statusPayment`
 
-No método `statusPayment`, é necessário criar uma instância do tipo `StatusPaymentPayload` com os seguintes parâmetros:
+No método `statusPayment`, é necessário criar uma instância do tipo `GetnetStatusPaymentPayload` com os seguintes parâmetros:
 
 caso a propriedade `result` dos métodos `pay`, `preAuthorize` ou `refund` forem igual a '5', significa que a transação está pendente, sendo necessario fazer a chamada do `statusPayment`, vai ser necessário informar o `callerId` que foi informado no método `pay`, `preAuthorize` ou `refund`.
 
-o `statusPayment` recebe como  parâmetro uma instancia de `StatusPaymentPayload`. sua inicialização é feita da seguinte forma:
+o `statusPayment` recebe como  parâmetro uma instancia de `GetnetStatusPaymentPayload`. sua inicialização é feita da seguinte forma:
 
 a propriedade `callerId` é obrigatória, e deve ser informada, e é a mesma que foi informada no método `pay`, `preAuthorize` ou `refund`.
 
 ```dart
-StatusPaymentPayload(
+GetnetStatusPaymentPayload(
     callerId: '123456789',
     allowPrintCurrentTransaction: false,
 );
 ```
 
-a estrutura de `StatusPaymentPayload` é a seguinte:
+a estrutura de `GetnetStatusPaymentPayload` é a seguinte:
 
 ```dart
-class StatusPaymentPayload {
+class GetnetStatusPaymentPayload {
   final String callerId;
   final bool allowPrintCurrentTransaction;
 
-  StatusPaymentPayload({required this.callerId, this.allowPrintCurrentTransaction = false});
+  GetnetStatusPaymentPayload({required this.callerId, this.allowPrintCurrentTransaction = false});
 
-  static StatusPaymentPayload fromJson(Map map) {
-    return StatusPaymentPayload(callerId: map['callerId'], allowPrintCurrentTransaction: map['allowPrintCurrentTransaction']);
+  static GetnetStatusPaymentPayload fromJson(Map map) {
+    return GetnetStatusPaymentPayload(callerId: map['callerId'], allowPrintCurrentTransaction: map['allowPrintCurrentTransaction']);
   }
 
   Map<String, dynamic> toJson() {
@@ -383,17 +383,17 @@ class StatusPaymentPayload {
 }
 ```
 
-se a solicitação for bem sucedida, o retorno será uma instância de `StatusPaymentResponse`, caso contrário, será lançado uma exceção do tipo `StatusPaymentException`.
+se a solicitação for bem sucedida, o retorno será uma instância de `GetnetStatusPaymentResponse`, caso contrário, será lançado uma exceção do tipo `GetnetStatusPaymentException`.
 
-a estrutura de `StatusPaymentResponse` é a seguinte:
+a estrutura de `GetnetStatusPaymentResponse` é a seguinte:
 
 ```dart
 import 'package:flutter_getnet_payment/models/payment_response.dart';
 
-class StatusPaymentResponse extends PaymentResponse {
+class GetnetStatusPaymentResponse extends GetnetPaymentResponse {
   final bool? refunded;
 
-  StatusPaymentResponse({
+  GetnetStatusPaymentResponse({
     required super.result,
     super.resultDetails,
     required super.amount,
@@ -421,8 +421,8 @@ class StatusPaymentResponse extends PaymentResponse {
     this.refunded = false,
   });
 
-  static StatusPaymentResponse fromJson({required Map json}) {
-    return StatusPaymentResponse(
+  static GetnetStatusPaymentResponse fromJson({required Map json}) {
+    return GetnetStatusPaymentResponse(
       result: json['result'],
       resultDetails: json['resultDetails'],
       amount: json['amount'],
@@ -465,7 +465,7 @@ class StatusPaymentResponse extends PaymentResponse {
 no método `preAuthorize`, é necessário criar uma instância do tipo `PreAuthorizePayload` com os seguintes parâmetros:
 
 ```dart
-PreAutorizationPayload(
+GetnetPreAutorizationPayload(
     amount: 150.00,
     callerId: '123456789',
     orderId: '123456789',
@@ -473,28 +473,28 @@ PreAutorizationPayload(
 );
 ```
 
-a estrutura de `PreAutorizationPayload` é a seguinte:
+a estrutura de `GetnetPreAutorizationPayload` é a seguinte:
 
 ```dart
-class PreAutorizationPayload {
+class GetnetPreAutorizationPayload {
   final double amount;
-  final CurrencyPosition currencyPosition;
+  final GetnetCurrencyPosition currencyPosition;
   final int currecyCode;
   final String callerId;
   final String? allowPrintCurrentTransaction;
   final String orderId;
 
-  PreAutorizationPayload({
+  GetnetPreAutorizationPayload({
     required this.amount,
-    this.currencyPosition = CurrencyPosition.CURRENCY_BEFORE_AMOUNT,
+    this.currencyPosition = GetnetCurrencyPosition.CURRENCY_BEFORE_AMOUNT,
     this.currecyCode = 986,
     required this.callerId,
     this.allowPrintCurrentTransaction,
     required this.orderId,
   });
 
-  static PreAutorizationPayload fromJson(Map map) {
-    return PreAutorizationPayload(
+  static GetnetPreAutorizationPayload fromJson(Map map) {
+    return GetnetPreAutorizationPayload(
       amount: int.parse(map['amount']) / 100,
       currencyPosition: map['currencyPosition'],
       currecyCode: map['currecyCode'] != null ? (map['currecyCode'] as num).toInt() : 986,
@@ -522,8 +522,8 @@ caso a solicitação seja bem sucedida, o retorno será uma instância de `PreAu
 a estrutura de `PreAuthorizeResponse` é a seguinte:
 
 ```dart
-class PreAutorizationResponse extends PaymentResponse {
-  PreAutorizationResponse({
+class GetnetPreAutorizationResponse extends GetnetPaymentResponse {
+  GetnetPreAutorizationResponse({
     required super.result,
     super.resultDetails,
     required super.amount,
@@ -539,8 +539,8 @@ class PreAutorizationResponse extends PaymentResponse {
     super.inputType = "",
   });
 
-  static PreAutorizationResponse fromJson({required Map json}) {
-    return PreAutorizationResponse(
+  static GetnetPreAutorizationResponse fromJson({required Map json}) {
+    return GetnetPreAutorizationResponse(
       result: json['result'],
       resultDetails: json['resultDetails'],
       amount: int.parse(json['amount']) / 100,
@@ -580,10 +580,10 @@ class PreAutorizationResponse extends PaymentResponse {
 
 ## Método `refund`
 
-No método `refund`, é necessário criar uma instância do tipo `RefundPayload` com os seguintes parâmetros:
+No método `refund`, é necessário criar uma instância do tipo `GetnetRefundPayload` com os seguintes parâmetros:
 
 ```dart	
-RefundPayload(
+GetnetRefundPayload(
     amount: 150.00,
     transactionDate: '29/07/2025' //data no formato dd/MM/yyyy,
     cvNumber: '123456789', //Número do CV da transação a ser estornada. É o mesmo campo que o pagamento retorna.
@@ -592,10 +592,10 @@ RefundPayload(
 )
 ```
 
-A estrutura de `RefundPayload` é a seguinte:
+A estrutura de `GetnetRefundPayload` é a seguinte:
 
 ```dart
-class RefundPayload {
+class GetnetRefundPayload {
   final double amount;
 
   /// Data da transação a ser estornada. caso null vai assumir o dia corrente. Enviar no formato: “dd/MM/yyyy”
@@ -604,10 +604,10 @@ class RefundPayload {
   final String? originTerminal;
   final String? allowPrintCurrentTransaction;
 
-  RefundPayload({required this.amount, this.transactionDate, this.cvNumber, this.originTerminal, this.allowPrintCurrentTransaction});
+  GetnetRefundPayload({required this.amount, this.transactionDate, this.cvNumber, this.originTerminal, this.allowPrintCurrentTransaction});
 
-  static RefundPayload fromJson(Map<String, dynamic> map) {
-    return RefundPayload(
+  static GetnetRefundPayload fromJson(Map<String, dynamic> map) {
+    return GetnetRefundPayload(
       amount: int.parse(map['amount']) / 100,
       transactionDate: map['transactionDate'],
       cvNumber: map['cvNumber'],
@@ -635,17 +635,17 @@ Se a requisição for enviada `com parâmetros faltando`, a próxima tela a ser 
 
 ## Resposta do Estorno
 
-Se a transação de estorno for bem-sucedida, o retorno será uma instância do tipo `RefundResponse` com a seguinte estrutura, caso contrario, será lançado uma exceção do tipo `RefundException`.
+Se a transação de estorno for bem-sucedida, o retorno será uma instância do tipo `GetnetRefundResponse` com a seguinte estrutura, caso contrario, será lançado uma exceção do tipo `GetnetRefundException`.
 
 ```dart	
-class RefundResponse extends PaymentResponse {
+class GetnetRefundResponse extends GetnetPaymentResponse {
   final String? nsuLastSuccessfullMessage;
   final String? refundTransactionDate;
   final String? refundCvNumber;
 
   final String refundOriginTerminal;
 
-  RefundResponse({
+  GetnetRefundResponse({
     required super.result,
     super.resultDetails,
     required super.amount,
@@ -676,8 +676,8 @@ class RefundResponse extends PaymentResponse {
     required this.refundOriginTerminal,
   });
 
-  static RefundResponse fromJson({required Map json}) {
-    return RefundResponse(
+  static GetnetRefundResponse fromJson({required Map json}) {
+    return GetnetRefundResponse(
       result: json['result'],
       resultDetails: json['resultDetails'],
       amount: int.parse(json['amount']) / 100,
@@ -717,50 +717,50 @@ class RefundResponse extends PaymentResponse {
 
 ## Método `print`
 
-No método `print`, é necessário criar uma instância do tipo `PrintPayload` com os seguintes parâmetros:
+No método `print`, é necessário criar uma instância do tipo `GetnetPrintPayload` com os seguintes parâmetros:
 
 ```dart
-PrintPayload(
+GetnetPrintPayload(
   printableContent: [
-    Contentprint(
-      type: PrintType.line,
+    GetnetContentprint(
+      type: GetnetPrintType.line,
       content: 'Texto a ser impresso'
     ),
-     Contentprint(
-      type: PrintType.text,
-      align: PrintAlign.center, //Obrigatório quando PrintType.text
-      size: PrintSize.big, ////Obrigatório quando PrintType.text
+     GetnetContentprint(
+      type: GetnetPrintType.text,
+      align: GetnetPrintAlign.center, //Obrigatório quando GetnetPrintType.text
+      size: GetnetPrintSize.big, ////Obrigatório quando GetnetPrintType.text
       content: 'Texto a ser impresso'
     ),
-     Contentprint(
-      type: PrintType.image, 
+     GetnetContentprint(
+      type: GetnetPrintType.image, 
       imagePath: 'iVBORw0KGgoAAAANSUhEUgAAAHcAAAAuCAAAAAA309lpAAACMklEQVRYw91YQXLDIAyUMj027Us606f6RL7lJP0Ise/bg7ERSLLdZkxnyiVGIK0AoRVh0J+0l2ZITCAmSus8tYNNv9wUl8Xn2A6XZec8tsK9lN0zEaFBCxMc0M3IoHawBAAxffLx9/frY1kkEV0/iYjC8bjjmSRuCrHjcXMoS9zD4/nqePNf10v2whrkDRjLR4t8BWPXbdyRmccDgBMZUXDiiv2DeSK4sKwWrfgIda8V/6L6blZvLMARTescAohCD7xlcsItjYXEXHn2LIESzO3mDARPYTJXwiQ/VgWFobsYGKRdRy5x6/1QuAPpKdq89MiTS1x9EBXuYJyVZd46p6ndXVwAqfwJpd4C20uLk/LsUIilQ5Q11A4tuIU8Ti4bi8oz6lNX8iD8rNUdXDm3iMs81le4pUOLOJrGatzBx1VqVRSU8qAdNRc855GwHxcFblQbYTvqx3M0ZxZnZeBq+UoayI0h3y7QPMhOyQA9JMkO9aMIqs6Rmrw73T6ey9anvDX5kbinvT2PW7yYzj8ogrcYqBOJjNxc21d5EjmH0e/iaqUV9dXj3YgYtkvCjbjaqs5O+85MxVvwTcZdhR5YuFbckCSfNkHUolTcE9Cq9iQfXtV62bo9nUBIm8AXedPidimVFIjZCdYlTw4W8RtsatKC7Bt7D4t5tMle9qPD+y4uyL81FS/UnnVu3eMzhuj3G7CqzkHF77ISsaoraSsqVnRhq3rSZ+F5Ur//b5zOOVoAwDc6szxdC+PYAAAAAABJRU5ErkJggg=='
     )
   ], 
 );
 ```
 
-A propriedade `printableContent` é uma lista de objetos `Contentprint` que representam o conteúdo a ser impresso. O objeto `Contentprint` possui as seguintes propriedades:
+A propriedade `printableContent` é uma lista de objetos `GetnetContentprint` que representam o conteúdo a ser impresso. O objeto `GetnetContentprint` possui as seguintes propriedades:
 
 ```dart
-class Contentprint {
-  final PrintType type;
+class GetnetContentprint {
+  final GetnetPrintType type;
   final String? content;
-  final PrintAlign? align;
-  final PrintSize? size;
+  final GetnetPrintAlign? align;
+  final GetnetPrintSize? size;
   final String? imagePath;
 
-  Contentprint({required this.type, this.content, this.align, this.size = PrintSize.medium, this.imagePath})
+  GetnetContentprint({required this.type, this.content, this.align, this.size = GetnetPrintSize.medium, this.imagePath})
     : assert(
-        type != PrintType.text || (content is String && align is PrintAlign && size is PrintSize),
+        type != GetnetPrintType.text || (content is String && align is GetnetPrintAlign && size is GetnetPrintSize),
         "content, align, and size must be defined when type is text",
       ),
-      assert(type != PrintType.image || imagePath is String, "imagePath cannot be null when type is image"),
-      assert(type != PrintType.line || content is String, "content cannot be null when type is line");
+      assert(type != GetnetPrintType.image || imagePath is String, "imagePath cannot be null when type is image"),
+      assert(type != GetnetPrintType.line || content is String, "content cannot be null when type is line");
 
   /// Método para formatar o conteúdo evitando cortes no meio das palavras e tratando palavras maiores que o limite da linha.
   String _formatContent() {
-    if (type == PrintType.image || content == null || size == null) return content ?? '';
+    if (type == GetnetPrintType.image || content == null || size == null) return content ?? '';
 
     int maxLength = _getMaxLength(size!);
     List<String> lines = [];
@@ -797,34 +797,34 @@ class Contentprint {
   }
 
   /// Retorna o tamanho máximo de caracteres permitido para cada tamanho de impressão
-  int _getMaxLength(PrintSize size) {
+  int _getMaxLength(GetnetPrintSize size) {
     switch (size) {
-      case PrintSize.small:
+      case GetnetPrintSize.small:
         return 48;
-      case PrintSize.medium:
-      case PrintSize.big:
+      case GetnetPrintSize.medium:
+      case GetnetPrintSize.big:
         return 32;
     }
   }
 
   Map<String, dynamic> toJson() {
-    bool disableAlignAndSize = type != PrintType.text;
+    bool disableAlignAndSize = type != GetnetPrintType.text;
 
     return {
       'type': type.name.toString(),
-      'content': type != PrintType.image ? _formatContent() : null,
+      'content': type != GetnetPrintType.image ? _formatContent() : null,
       'align': disableAlignAndSize ? null : align?.name.toString(),
       'size': disableAlignAndSize ? null : size?.name.toString(),
-      'imagePath': type == PrintType.image ? imagePath : null,
+      'imagePath': type == GetnetPrintType.image ? imagePath : null,
     };
   }
 
-  static Contentprint fromJson(Map<String, dynamic> json) {
-    return Contentprint(
-      type: PrintType.values.firstWhere((e) => e.name == json['type']),
+  static GetnetContentprint fromJson(Map<String, dynamic> json) {
+    return GetnetContentprint(
+      type: GetnetPrintType.values.firstWhere((e) => e.name == json['type']),
       content: json['content'],
-      align: json['align'] != null ? PrintAlign.values.firstWhere((e) => e.name == json['align']) : null,
-      size: PrintSize.values.firstWhere((e) => e.name == json['size']),
+      align: json['align'] != null ? GetnetPrintAlign.values.firstWhere((e) => e.name == json['align']) : null,
+      size: GetnetPrintSize.values.firstWhere((e) => e.name == json['size']),
       imagePath: json['imagePath'],
     );
   }
@@ -832,11 +832,11 @@ class Contentprint {
 
 ```
 
-A classe `Contentprint` faz o gerenciamento do conteúdo a ser impresso, onde se o type é `PrintType.text` ou `PrintType.line`, o conteúdo é formatado para evitar cortes no meio das palavras e tratar palavras maiores que o limite da linha.
+A classe `GetnetContentprint` faz o gerenciamento do conteúdo a ser impresso, onde se o type é `GetnetPrintType.text` ou `GetnetPrintType.line`, o conteúdo é formatado para evitar cortes no meio das palavras e tratar palavras maiores que o limite da linha.
 
 ## Resposta de impressão
 
-Caso a impressão seja bem-sucedida, a resposta será `void` caso contrário, será lançada uma exceção `PrintException` com a mensagem de erro.
+Caso a impressão seja bem-sucedida, a resposta será `void` caso contrário, será lançada uma exceção `GetnetPrintException` com a mensagem de erro.
 
 ## Método `reprint`
 
@@ -845,7 +845,7 @@ Não é necessário passar nenhum parâmetro para este método.
 
 ## Resposta de reeimpressão
 
-Caso a Reimpressão seja bem-sucedida, a resposta será `void` caso contrário, será lançada uma exceção `ReprintException` com a mensagem de erro.
+Caso a Reimpressão seja bem-sucedida, a resposta será `void` caso contrário, será lançada uma exceção `GetnetReprintException` com a mensagem de erro.
 
 ## Método `info`
 
@@ -854,12 +854,12 @@ Não é necessário passar nenhum parâmetro para este método.
 
 ## Resposta de informações
 
-Caso a solicitação seja bem-sucedida, a resposta será um objeto `InfoResponse` com as informações do terminal POS.
+Caso a solicitação seja bem-sucedida, a resposta será um objeto `GetnetInfoResponse` com as informações do terminal POS.
 
-Se a transação de estorno for bem-sucedida, o retorno será uma instância do tipo `InfoResponse` com as informações do terminal POS, caso contrario, será lançado uma exceção do tipo `RefundException`.
+Se a transação de estorno for bem-sucedida, o retorno será uma instância do tipo `GetnetInfoResponse` com as informações do terminal POS, caso contrario, será lançado uma exceção do tipo `GetnetRefundException`.
 
 ```dart
-class InfoResponse {
+class GetnetInfoResponse {
   final String result;
   final String ec;
   final String numserie;
@@ -869,7 +869,7 @@ class InfoResponse {
   final String razaoSocialEC;
   final String cidadeEC;
 
-  InfoResponse({
+  GetnetInfoResponse({
     required this.result,
     required this.ec,
     required this.numserie,
@@ -880,8 +880,8 @@ class InfoResponse {
     required this.cidadeEC,
   });
 
-  static InfoResponse fromJson({required Map json}) {
-    return InfoResponse(
+  static GetnetInfoResponse fromJson({required Map json}) {
+    return GetnetInfoResponse(
       result: json['result'],
       ec: json['ec'],
       numserie: json['numserie'],

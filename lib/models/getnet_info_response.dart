@@ -1,4 +1,4 @@
-class InfoResponse {
+class GetnetInfoResponse {
   final String result;
   final String ec;
   final String numserie;
@@ -8,7 +8,7 @@ class InfoResponse {
   final String razaoSocialEC;
   final String cidadeEC;
 
-  InfoResponse({
+  GetnetInfoResponse({
     required this.result,
     required this.ec,
     required this.numserie,
@@ -19,8 +19,8 @@ class InfoResponse {
     required this.cidadeEC,
   });
 
-  static InfoResponse fromJson({required Map json}) {
-    return InfoResponse(
+  static GetnetInfoResponse fromJson({required Map json}) {
+    return GetnetInfoResponse(
       result: json['result'],
       ec: json['ec'],
       numserie: json['numserie'],

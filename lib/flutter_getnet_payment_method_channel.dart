@@ -1,24 +1,25 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_getnet_payment/constants/status_deeplink.dart';
-import 'package:flutter_getnet_payment/exceptions/payment_exception.dart';
-import 'package:flutter_getnet_payment/exceptions/print_exception.dart';
-import 'package:flutter_getnet_payment/exceptions/refund_exception.dart';
-import 'package:flutter_getnet_payment/exceptions/reprint_exception.dart';
-import 'package:flutter_getnet_payment/exceptions/status_payment_exception.dart';
-import 'package:flutter_getnet_payment/models/info_response.dart';
-import 'package:flutter_getnet_payment/models/payment_response.dart';
-import 'package:flutter_getnet_payment/models/pre_autorization_payload.dart';
-import 'package:flutter_getnet_payment/models/pre_autorization_response.dart';
-import 'package:flutter_getnet_payment/models/print_payload.dart';
-import 'package:flutter_getnet_payment/models/refund_payload.dart';
-import 'package:flutter_getnet_payment/models/refund_response.dart';
-import 'package:flutter_getnet_payment/models/status_payment_payload.dart';
-import 'package:flutter_getnet_payment/models/status_payment_response.dart';
 
-import 'exceptions/pre_autorization_exception.dart';
 import 'flutter_getnet_payment_platform_interface.dart';
-import 'models/payment_payload.dart';
+
+import 'exceptions/getnet_pre_autorization_exception.dart';
+import 'exceptions/getnet_status_payment_exception.dart';
+import 'models/getnet_pre_autorization_response.dart';
+import 'models/getnet_pre_autorization_payload.dart';
+import 'models/getnet_status_payment_response.dart';
+import 'models/getnet_status_payment_payload.dart';
+import 'exceptions/getnet_payment_exception.dart';
+import 'exceptions/getnet_reprint_exception.dart';
+import 'exceptions/getnet_refund_exception.dart';
+import 'exceptions/getnet_print_exception.dart';
+import 'constants/getnet_status_deeplink.dart';
+import 'models/getnet_payment_response.dart';
+import 'models/getnet_payment_payload.dart';
+import 'models/getnet_refund_response.dart';
+import 'models/getnet_refund_payload.dart';
+import 'models/getnet_info_response.dart';
+import 'models/getnet_print_payload.dart';
 
 /// An implementation of [FlutterGetnetPaymentPlatform] that uses method channels.
 class MethodChannelFlutterGetnetPayment extends FlutterGetnetPaymentPlatform {
@@ -27,140 +28,116 @@ class MethodChannelFlutterGetnetPayment extends FlutterGetnetPaymentPlatform {
   final methodChannel = const MethodChannel('flutter_getnet_payment');
 
   @override
-  Future<PaymentResponse> pay({required PaymentPayload paymentPayload}) async {
+  Future<GetnetPaymentResponse> pay({required GetnetPaymentPayload paymentPayload}) async {
     try {
-      final response = await methodChannel.invokeMethod<Map>(
-        'pay',
-        paymentPayload.toJson(),
-      );
+      final response = await methodChannel.invokeMethod<Map>('pay', paymentPayload.toJson());
       if (response is Map) {
-        if ((response['code'] == StatusDeeplink.SUCCESS.name ||
-                response['code'] == StatusDeeplink.PENDING.name) &&
-            response['data'] is Map) {
+        if ((response['code'] == GetnetStatusDeeplink.SUCCESS.name || response['code'] == GetnetStatusDeeplink.PENDING.name) && response['data'] is Map) {
           final jsonData = response['data'];
-          return PaymentResponse.fromJson(jsonData);
+          return GetnetPaymentResponse.fromJson(jsonData);
         } else {
-          throw PaymentException(message: response['message']);
+          throw GetnetPaymentException(message: response['message']);
         }
       } else {
-        throw PaymentException(message: 'invalid response');
+        throw GetnetPaymentException(message: 'invalid response');
       }
-    } on PaymentException catch (e) {
-      throw PaymentException(message: e.message);
+    } on GetnetPaymentException catch (e) {
+      throw GetnetPaymentException(message: e.message);
     } on PlatformException catch (e) {
-      throw PaymentException(message: e.message ?? 'PlatformException');
+      throw GetnetPaymentException(message: e.message ?? 'PlatformException');
     } catch (e) {
-      throw PaymentException(message: "Pay Error: $e");
+      throw GetnetPaymentException(message: "Pay Error: $e");
     }
   }
 
   @override
-  Future<StatusPaymentResponse> statusPayment({
-    required StatusPaymentPayload statusPaymentPayload,
-  }) async {
+  Future<GetnetStatusPaymentResponse> statusPayment({required GetnetStatusPaymentPayload statusPaymentPayload}) async {
     try {
-      final response = await methodChannel.invokeMethod<Map>(
-        'statusPayment',
-        statusPaymentPayload.toJson(),
-      );
+      final response = await methodChannel.invokeMethod<Map>('statusPayment', statusPaymentPayload.toJson());
       if (response is Map) {
-        if ((response['code'] == StatusDeeplink.SUCCESS.name ||
-                response['code'] == StatusDeeplink.PENDING.name) &&
-            response['data'] is Map) {
+        if ((response['code'] == GetnetStatusDeeplink.SUCCESS.name || response['code'] == GetnetStatusDeeplink.PENDING.name) && response['data'] is Map) {
           final jsonData = response['data'];
-          return StatusPaymentResponse.fromJson(json: jsonData);
+          return GetnetStatusPaymentResponse.fromJson(json: jsonData);
         } else {
-          throw StatusPaymentException(message: response['message']);
+          throw GetnetStatusPaymentException(message: response['message']);
         }
       } else {
-        throw StatusPaymentException(message: 'invalid response');
+        throw GetnetStatusPaymentException(message: 'invalid response');
       }
-    } on StatusPaymentException catch (e) {
-      throw StatusPaymentException(message: e.message);
+    } on GetnetStatusPaymentException catch (e) {
+      throw GetnetStatusPaymentException(message: e.message);
     } on PlatformException catch (e) {
-      throw StatusPaymentException(message: e.message ?? 'PlatformException');
+      throw GetnetStatusPaymentException(message: e.message ?? 'PlatformException');
     } catch (e) {
-      throw StatusPaymentException(message: "Status payment Error: $e");
+      throw GetnetStatusPaymentException(message: "Status payment Error: $e");
     }
   }
 
   @override
-  Future<PreAutorizationResponse> preAutorization({
-    required PreAutorizationPayload preAutorizationPayload,
-  }) async {
+  Future<GetnetPreAutorizationResponse> preAutorization({required GetnetPreAutorizationPayload preAutorizationPayload}) async {
     try {
-      final response = await methodChannel.invokeMethod<Map>(
-        'preAuthorization',
-        preAutorizationPayload.toJson(),
-      );
+      final response = await methodChannel.invokeMethod<Map>('preAuthorization', preAutorizationPayload.toJson());
       if (response is Map) {
-        if ((response['code'] == StatusDeeplink.SUCCESS.name ||
-                response['code'] == StatusDeeplink.PENDING.name) &&
-            response['data'] is Map) {
+        if ((response['code'] == GetnetStatusDeeplink.SUCCESS.name || response['code'] == GetnetStatusDeeplink.PENDING.name) && response['data'] is Map) {
           final jsonData = response['data'];
-          return PreAutorizationResponse.fromJson(json: jsonData);
+          return GetnetPreAutorizationResponse.fromJson(json: jsonData);
         } else {
-          throw PreAutorizationException(message: response['message']);
+          throw GetnetPreAutorizationException(message: response['message']);
         }
       } else {
-        throw PreAutorizationException(message: 'invalid response');
+        throw GetnetPreAutorizationException(message: 'invalid response');
       }
-    } on PreAutorizationException catch (e) {
-      throw PreAutorizationException(message: e.message);
+    } on GetnetPreAutorizationException catch (e) {
+      throw GetnetPreAutorizationException(message: e.message);
     } on PlatformException catch (e) {
-      throw PreAutorizationException(message: e.message ?? 'PlatformException');
+      throw GetnetPreAutorizationException(message: e.message ?? 'PlatformException');
     } catch (e) {
-      throw PreAutorizationException(message: "Status payment Error: $e");
+      throw GetnetPreAutorizationException(message: "Status payment Error: $e");
     }
   }
 
   @override
-  Future<RefundResponse> refund({required RefundPayload refundPayload}) async {
+  Future<GetnetRefundResponse> refund({required GetnetRefundPayload refundPayload}) async {
     try {
       final refund = refundPayload.toJson();
       final response = await methodChannel.invokeMethod<Map>('refund', refund);
       if (response is Map) {
-        if ((response['code'] == StatusDeeplink.SUCCESS.name ||
-                response['code'] == StatusDeeplink.PENDING.name) &&
-            response['data'] is Map) {
+        if ((response['code'] == GetnetStatusDeeplink.SUCCESS.name || response['code'] == GetnetStatusDeeplink.PENDING.name) && response['data'] is Map) {
           final jsonData = response['data'];
-          return RefundResponse.fromJson(json: jsonData);
+          return GetnetRefundResponse.fromJson(json: jsonData);
         } else {
-          throw RefundException(message: response['message']);
+          throw GetnetRefundException(message: response['message']);
         }
       } else {
-        throw RefundException(message: 'invalid response');
+        throw GetnetRefundException(message: 'invalid response');
       }
-    } on RefundException catch (e) {
-      throw RefundException(message: e.message);
+    } on GetnetRefundException catch (e) {
+      throw GetnetRefundException(message: e.message);
     } on PlatformException catch (e) {
-      throw RefundException(message: e.message ?? 'PlatformException');
+      throw GetnetRefundException(message: e.message ?? 'PlatformException');
     } catch (e) {
-      throw RefundException(message: "Status payment Error: $e");
+      throw GetnetRefundException(message: "Status payment Error: $e");
     }
   }
 
   @override
-  Future<void> print({required PrintPayload printPayload}) async {
+  Future<void> print({required GetnetPrintPayload printPayload}) async {
     try {
-      final response = await methodChannel.invokeMethod<Map>(
-        'print',
-        printPayload.toJson(),
-      );
+      final response = await methodChannel.invokeMethod<Map>('print', printPayload.toJson());
 
       if (response is Map) {
-        if (response['code'] != StatusDeeplink.SUCCESS.name) {
-          throw PrintException(message: response['message']);
+        if (response['code'] != GetnetStatusDeeplink.SUCCESS.name) {
+          throw GetnetPrintException(message: response['message']);
         }
       } else {
-        throw PrintException(message: 'invalid response');
+        throw GetnetPrintException(message: 'invalid response');
       }
-    } on PrintException catch (e) {
-      throw PrintException(message: e.message);
+    } on GetnetPrintException catch (e) {
+      throw GetnetPrintException(message: e.message);
     } on PlatformException catch (e) {
-      throw PrintException(message: e.message ?? 'PlatformException');
+      throw GetnetPrintException(message: e.message ?? 'PlatformException');
     } catch (e) {
-      throw PrintException(message: "Print Error: $e");
+      throw GetnetPrintException(message: "Print Error: $e");
     }
   }
 
@@ -169,43 +146,41 @@ class MethodChannelFlutterGetnetPayment extends FlutterGetnetPaymentPlatform {
     try {
       final response = await methodChannel.invokeMethod<Map>('reprint');
       if (response is Map) {
-        if (response['code'] == StatusDeeplink.ERROR.name) {
-          throw ReprintException(message: response['message']);
+        if (response['code'] == GetnetStatusDeeplink.ERROR.name) {
+          throw GetnetReprintException(message: response['message']);
         }
       } else {
-        throw ReprintException(message: 'invalid response');
+        throw GetnetReprintException(message: 'invalid response');
       }
-    } on ReprintException catch (e) {
-      throw ReprintException(message: e.message);
+    } on GetnetReprintException catch (e) {
+      throw GetnetReprintException(message: e.message);
     } on PlatformException catch (e) {
-      throw ReprintException(message: e.message ?? 'PlatformException');
+      throw GetnetReprintException(message: e.message ?? 'PlatformException');
     } catch (e) {
-      throw ReprintException(message: "reprint payment Error: $e");
+      throw GetnetReprintException(message: "reprint payment Error: $e");
     }
   }
 
   @override
-  Future<InfoResponse> info() async {
+  Future<GetnetInfoResponse> info() async {
     try {
       final response = await methodChannel.invokeMethod<Map>('info');
       if (response is Map) {
-        if ((response['code'] == StatusDeeplink.SUCCESS.name ||
-                response['code'] == StatusDeeplink.PENDING.name) &&
-            response['data'] is Map) {
+        if ((response['code'] == GetnetStatusDeeplink.SUCCESS.name || response['code'] == GetnetStatusDeeplink.PENDING.name) && response['data'] is Map) {
           final jsonData = response['data'];
-          return InfoResponse.fromJson(json: jsonData);
+          return GetnetInfoResponse.fromJson(json: jsonData);
         } else {
-          throw RefundException(message: response['message']);
+          throw GetnetRefundException(message: response['message']);
         }
       } else {
-        throw ReprintException(message: 'invalid response');
+        throw GetnetReprintException(message: 'invalid response');
       }
-    } on ReprintException catch (e) {
-      throw ReprintException(message: e.message);
+    } on GetnetReprintException catch (e) {
+      throw GetnetReprintException(message: e.message);
     } on PlatformException catch (e) {
-      throw ReprintException(message: e.message ?? 'PlatformException');
+      throw GetnetReprintException(message: e.message ?? 'PlatformException');
     } catch (e) {
-      throw ReprintException(message: "reprint payment Error: $e");
+      throw GetnetReprintException(message: "reprint payment Error: $e");
     }
   }
 }

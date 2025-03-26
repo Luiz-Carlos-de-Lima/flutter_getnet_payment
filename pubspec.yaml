@@ -1,6 +1,6 @@
 name: flutter_getnet_payment
 description: "Plugin flutter que faz a integração com o SDK da getnet, para pagamento com maquininhas POS"
-version: 1.0.2
+version: 1.1.0
 homepage: https://github.com/Luiz-Carlos-de-Lima/flutter_getnet_payment
 
 environment:
