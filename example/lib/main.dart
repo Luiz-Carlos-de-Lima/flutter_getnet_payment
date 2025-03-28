@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:math';
 
+import 'package:flutter_getnet_payment/exceptions/getnet_pre_autorization_exception.dart';
 import 'package:flutter_getnet_payment/models/getnet_pre_autorization_payload.dart';
 import 'package:flutter_getnet_payment/constants/getnet_print_content_types.dart';
 import 'package:flutter_getnet_payment/exceptions/getnet_payment_exception.dart';
@@ -296,10 +297,10 @@ class _PaymentPageState extends State<_PaymentPage> {
                         );
                         final response = await flutterGetnetPaymentPlugin.pay(paymentPayload: payment);
                         listPayments.add(response);
-                        final print = GetnetPrintPayload(
-                          printableContent: [GetnetContentprint(type: GetnetPrintType.line, content: response.toJson().toString())],
-                        );
-                        await flutterGetnetPaymentPlugin.print(printPayload: print);
+                        // final print = GetnetPrintPayload(
+                        //   printableContent: [GetnetContentprint(type: GetnetPrintType.line, content: response.toJson().toString())],
+                        // );
+                        // await flutterGetnetPaymentPlugin.print(printPayload: print);
 
                         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Simulacao pagamento e Impressão realizada com sucesso!")));
                       } on GetnetPaymentException catch (e) {
@@ -397,7 +398,7 @@ class _PreAutorizationPageState extends State<_PreAutorizationPage> {
                         final response = await flutterGetnetPaymentPlugin.preAutorization(preAutorizationPayload: preAutorization);
 
                         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Simulacao pre autorização ${response.toJson().toString()}")));
-                      } on GetnetPaymentException catch (e) {
+                      } on GetnetPreAutorizationException catch (e) {
                         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.message)));
                       } on GetnetPrintException catch (e) {
                         ScaffoldMessenger.of(
@@ -526,7 +527,7 @@ class _CancelPageState extends State<_CancelPage> {
                                   amount: listPayments[_indexPayment!].amount,
                                   transactionDate: formattedDate,
                                   cvNumber: listPayments[_indexPayment!].cvNumber,
-                                  originTerminal: info.numlogic,
+                                  originTerminal: info.numlogic.isNotEmpty ? info.numlogic : null,
                                 );
 
                                 final response = await flutterGetnetPaymentPlugin.refund(refundPayload: refundPayload);

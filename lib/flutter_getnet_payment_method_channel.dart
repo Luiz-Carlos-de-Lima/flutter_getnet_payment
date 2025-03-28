@@ -107,7 +107,7 @@ class MethodChannelFlutterGetnetPayment extends FlutterGetnetPaymentPlatform {
       final response = await methodChannel.invokeMethod<Map>('preAuthorization', preAutorizationPayload.toJson());
       if (response is Map) {
         if ((response['code'] == GetnetStatusDeeplink.SUCCESS.name || response['code'] == GetnetStatusDeeplink.PENDING.name) && response['data'] is Map) {
-          if (response['code'] == GetnetStatusDeeplink.PENDING.name) {
+          if (response['code'] == GetnetStatusDeeplink.SUCCESS.name) {
             final jsonData = response['data'];
             return GetnetPreAutorizationResponse.fromJson(json: jsonData);
           } else {
@@ -143,7 +143,7 @@ class MethodChannelFlutterGetnetPayment extends FlutterGetnetPaymentPlatform {
       final response = await methodChannel.invokeMethod<Map>('refund', refund);
       if (response is Map) {
         if ((response['code'] == GetnetStatusDeeplink.SUCCESS.name || response['code'] == GetnetStatusDeeplink.PENDING.name) && response['data'] is Map) {
-          if (response['code'] == GetnetStatusDeeplink.PENDING.name) {
+          if (response['code'] == GetnetStatusDeeplink.SUCCESS.name) {
             final jsonData = response['data'];
             return GetnetRefundResponse.fromJson(json: jsonData);
           } else {
@@ -220,7 +220,7 @@ class MethodChannelFlutterGetnetPayment extends FlutterGetnetPaymentPlatform {
       final response = await methodChannel.invokeMethod<Map>('info');
       if (response is Map) {
         if ((response['code'] == GetnetStatusDeeplink.SUCCESS.name || response['code'] == GetnetStatusDeeplink.PENDING.name) && response['data'] is Map) {
-          if (response['code'] == GetnetStatusDeeplink.PENDING.name) {
+          if (response['code'] == GetnetStatusDeeplink.SUCCESS.name) {
             final jsonData = response['data'];
             return GetnetInfoResponse.fromJson(json: jsonData);
           } else {
