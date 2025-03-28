@@ -14,3 +14,9 @@
 # 1.1.0
 
 * rename files and class
+
+# 1.1.1
+* add get device info
+
+# 1.1.2
+* fix bug returning pending transactions

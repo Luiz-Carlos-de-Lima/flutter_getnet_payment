@@ -1,5 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_getnet_payment/exceptions/getnet_info_exception.dart';
+import 'package:flutter_getnet_payment/models/getnet_device_info.dart';
 
 import 'flutter_getnet_payment_platform_interface.dart';
 
@@ -33,8 +35,21 @@ class MethodChannelFlutterGetnetPayment extends FlutterGetnetPaymentPlatform {
       final response = await methodChannel.invokeMethod<Map>('pay', paymentPayload.toJson());
       if (response is Map) {
         if ((response['code'] == GetnetStatusDeeplink.SUCCESS.name || response['code'] == GetnetStatusDeeplink.PENDING.name) && response['data'] is Map) {
-          final jsonData = response['data'];
-          return GetnetPaymentResponse.fromJson(jsonData);
+          if (response['code'] == GetnetStatusDeeplink.SUCCESS.name) {
+            final jsonData = response['data'];
+            return GetnetPaymentResponse.fromJson(jsonData);
+          } else {
+            return GetnetPaymentResponse(
+              result: response['result'] ?? '5',
+              resultDetails: 'Operação ainda pendente cancelada pelo lojista, realize consulta do status',
+              printMerchantPreference: response['printMerchantPreference'] ?? false,
+              amount: paymentPayload.amount,
+              callerId: paymentPayload.callerId,
+              receiptAlreadyPrinted: false,
+              type: '',
+              inputType: '',
+            );
+          }
         } else {
           throw GetnetPaymentException(message: response['message']);
         }
@@ -56,8 +71,21 @@ class MethodChannelFlutterGetnetPayment extends FlutterGetnetPaymentPlatform {
       final response = await methodChannel.invokeMethod<Map>('statusPayment', statusPaymentPayload.toJson());
       if (response is Map) {
         if ((response['code'] == GetnetStatusDeeplink.SUCCESS.name || response['code'] == GetnetStatusDeeplink.PENDING.name) && response['data'] is Map) {
-          final jsonData = response['data'];
-          return GetnetStatusPaymentResponse.fromJson(json: jsonData);
+          if (response['code'] == GetnetStatusDeeplink.SUCCESS.name) {
+            final jsonData = response['data'];
+            return GetnetStatusPaymentResponse.fromJson(json: jsonData);
+          } else {
+            return GetnetStatusPaymentResponse(
+              result: response['result'] ?? '5',
+              resultDetails: 'Operação ainda pendente cancelada pelo lojista, realize consulta do status',
+              printMerchantPreference: response['printMerchantPreference'] ?? false,
+              amount: 0.00,
+              callerId: statusPaymentPayload.callerId,
+              receiptAlreadyPrinted: false,
+              type: '',
+              inputType: '',
+            );
+          }
         } else {
           throw GetnetStatusPaymentException(message: response['message']);
         }
@@ -79,8 +107,20 @@ class MethodChannelFlutterGetnetPayment extends FlutterGetnetPaymentPlatform {
       final response = await methodChannel.invokeMethod<Map>('preAuthorization', preAutorizationPayload.toJson());
       if (response is Map) {
         if ((response['code'] == GetnetStatusDeeplink.SUCCESS.name || response['code'] == GetnetStatusDeeplink.PENDING.name) && response['data'] is Map) {
-          final jsonData = response['data'];
-          return GetnetPreAutorizationResponse.fromJson(json: jsonData);
+          if (response['code'] == GetnetStatusDeeplink.PENDING.name) {
+            final jsonData = response['data'];
+            return GetnetPreAutorizationResponse.fromJson(json: jsonData);
+          } else {
+            return GetnetPreAutorizationResponse(
+              result: response['result'] ?? '5',
+              resultDetails: 'Operação ainda pendente cancelada pelo lojista, realize consulta do status',
+              amount: preAutorizationPayload.amount,
+              callerId: preAutorizationPayload.callerId,
+              receiptAlreadyPrinted: false,
+              type: '',
+              inputType: '',
+            );
+          }
         } else {
           throw GetnetPreAutorizationException(message: response['message']);
         }
@@ -103,8 +143,21 @@ class MethodChannelFlutterGetnetPayment extends FlutterGetnetPaymentPlatform {
       final response = await methodChannel.invokeMethod<Map>('refund', refund);
       if (response is Map) {
         if ((response['code'] == GetnetStatusDeeplink.SUCCESS.name || response['code'] == GetnetStatusDeeplink.PENDING.name) && response['data'] is Map) {
-          final jsonData = response['data'];
-          return GetnetRefundResponse.fromJson(json: jsonData);
+          if (response['code'] == GetnetStatusDeeplink.PENDING.name) {
+            final jsonData = response['data'];
+            return GetnetRefundResponse.fromJson(json: jsonData);
+          } else {
+            return GetnetRefundResponse(
+              result: response['result'] ?? '5',
+              resultDetails: 'Operação ainda pendente cancelada pelo lojista, realize consulta do status',
+              amount: refundPayload.amount,
+              callerId: response['callerId'] ?? '',
+              receiptAlreadyPrinted: false,
+              type: '',
+              inputType: '',
+              refundOriginTerminal: response['refundOriginTerminal'] ?? '',
+            );
+          }
         } else {
           throw GetnetRefundException(message: response['message']);
         }
@@ -167,20 +220,56 @@ class MethodChannelFlutterGetnetPayment extends FlutterGetnetPaymentPlatform {
       final response = await methodChannel.invokeMethod<Map>('info');
       if (response is Map) {
         if ((response['code'] == GetnetStatusDeeplink.SUCCESS.name || response['code'] == GetnetStatusDeeplink.PENDING.name) && response['data'] is Map) {
-          final jsonData = response['data'];
-          return GetnetInfoResponse.fromJson(json: jsonData);
+          if (response['code'] == GetnetStatusDeeplink.PENDING.name) {
+            final jsonData = response['data'];
+            return GetnetInfoResponse.fromJson(json: jsonData);
+          } else {
+            return GetnetInfoResponse(
+              result: response['result'] ?? '5',
+              ec: '',
+              numserie: '',
+              numlogic: '',
+              version: '',
+              cnpjEC: '',
+              razaoSocialEC: '',
+              cidadeEC: '',
+            );
+          }
         } else {
-          throw GetnetRefundException(message: response['message']);
+          throw GetnetInfoException(message: response['message']);
         }
       } else {
-        throw GetnetReprintException(message: 'invalid response');
+        throw GetnetInfoException(message: 'invalid response');
       }
-    } on GetnetReprintException catch (e) {
-      throw GetnetReprintException(message: e.message);
+    } on GetnetInfoException catch (e) {
+      throw GetnetInfoException(message: e.message);
     } on PlatformException catch (e) {
-      throw GetnetReprintException(message: e.message ?? 'PlatformException');
+      throw GetnetInfoException(message: e.message ?? 'PlatformException');
     } catch (e) {
-      throw GetnetReprintException(message: "reprint payment Error: $e");
+      throw GetnetInfoException(message: "info payment Error: $e");
+    }
+  }
+
+  @override
+  Future<GetnetDeviceInfo> deviceInfo() async {
+    try {
+      final response = await methodChannel.invokeMethod<Map>('getSerialNumberAndDeviceModel');
+      if (response is Map) {
+        if ((response['code'] == GetnetStatusDeeplink.SUCCESS.name) && response['data'] is Map) {
+          final jsonData = response['data'];
+          return GetnetDeviceInfo.fromJson(json: jsonData);
+        } else {
+          throw GetnetInfoException(message: response['message']);
+        }
+      } else {
+        throw GetnetInfoException(message: 'invalid response');
+      }
+    } on GetnetInfoException catch (e) {
+      throw GetnetInfoException(message: e.message);
+    } on PlatformException catch (e) {
+      throw GetnetInfoException(message: e.message ?? 'PlatformException');
+    } catch (e) {
+      throw GetnetInfoException(message: "deviceInfo payment Error: $e");
     }
   }
 }

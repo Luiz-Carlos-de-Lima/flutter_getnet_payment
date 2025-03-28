@@ -7,17 +7,32 @@ class GetnetContentprint {
   final GetnetPrintSize? size;
   final String? imagePath;
 
-  GetnetContentprint({required this.type, this.content, this.align, this.size = GetnetPrintSize.medium, this.imagePath})
-    : assert(
-        type != GetnetPrintType.text || (content is String && align is GetnetPrintAlign && size is GetnetPrintSize),
-        "content, align, and size must be defined when type is text",
-      ),
-      assert(type != GetnetPrintType.image || imagePath is String, "imagePath cannot be null when type is image"),
-      assert(type != GetnetPrintType.line || content is String, "content cannot be null when type is line");
+  GetnetContentprint({
+    required this.type,
+    this.content,
+    this.align,
+    this.size = GetnetPrintSize.medium,
+    this.imagePath,
+  }) : assert(
+         type != GetnetPrintType.text ||
+             (content is String &&
+                 align is GetnetPrintAlign &&
+                 size is GetnetPrintSize),
+         "content, align, and size must be defined when type is text",
+       ),
+       assert(
+         type != GetnetPrintType.image || imagePath is String,
+         "imagePath cannot be null when type is image",
+       ),
+       assert(
+         type != GetnetPrintType.line || content is String,
+         "content cannot be null when type is line",
+       );
 
   /// Método para formatar o conteúdo evitando cortes no meio das palavras e tratando palavras maiores que o limite da linha.
   String _formatContent() {
-    if (type == GetnetPrintType.image || content == null || size == null) return content ?? '';
+    if (type == GetnetPrintType.image || content == null || size == null)
+      return content ?? '';
 
     int maxLength = _getMaxLength(size!);
     List<String> lines = [];
@@ -34,7 +49,12 @@ class GetnetContentprint {
 
         // Divide a palavra em partes do tamanho máximo permitido
         for (int i = 0; i < word.length; i += maxLength) {
-          lines.add(word.substring(i, (i + maxLength) > word.length ? word.length : (i + maxLength)));
+          lines.add(
+            word.substring(
+              i,
+              (i + maxLength) > word.length ? word.length : (i + maxLength),
+            ),
+          );
         }
       } else if (currentLine.isEmpty) {
         currentLine = word;
@@ -80,7 +100,12 @@ class GetnetContentprint {
     return GetnetContentprint(
       type: GetnetPrintType.values.firstWhere((e) => e.name == json['type']),
       content: json['content'],
-      align: json['align'] != null ? GetnetPrintAlign.values.firstWhere((e) => e.name == json['align']) : null,
+      align:
+          json['align'] != null
+              ? GetnetPrintAlign.values.firstWhere(
+                (e) => e.name == json['align'],
+              )
+              : null,
       size: GetnetPrintSize.values.firstWhere((e) => e.name == json['size']),
       imagePath: json['imagePath'],
     );

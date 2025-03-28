@@ -7,7 +7,13 @@ class GetnetRefundPayload {
   final String? originTerminal;
   final String? allowPrintCurrentTransaction;
 
-  GetnetRefundPayload({required this.amount, this.transactionDate, this.cvNumber, this.originTerminal, this.allowPrintCurrentTransaction});
+  GetnetRefundPayload({
+    required this.amount,
+    this.transactionDate,
+    this.cvNumber,
+    this.originTerminal,
+    this.allowPrintCurrentTransaction,
+  });
 
   static GetnetRefundPayload fromJson(Map<String, dynamic> map) {
     return GetnetRefundPayload(

@@ -1,3 +1,4 @@
+import 'package:flutter_getnet_payment/models/getnet_device_info.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 import 'flutter_getnet_payment_method_channel.dart';
 
@@ -59,5 +60,9 @@ abstract class FlutterGetnetPaymentPlatform extends PlatformInterface {
 
   Future<GetnetInfoResponse> info() async {
     throw UnimplementedError('info() has not been implemented.');
+  }
+
+  Future<GetnetDeviceInfo> deviceInfo() {
+    throw UnimplementedError('deviceInfo() has not been implemented.');
   }
 }

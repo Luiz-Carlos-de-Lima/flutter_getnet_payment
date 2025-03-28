@@ -19,6 +19,7 @@ import br.com.jclan.alphaxGetnetPayment.flutter_getnet_payment.deeplink.PreAutho
 import br.com.jclan.alphaxGetnetPayment.flutter_getnet_payment.deeplink.RefundDeeplink
 import br.com.jclan.alphaxGetnetPayment.flutter_getnet_payment.deeplink.ReprintDeeplink
 import br.com.jclan.alphaxGetnetPayment.flutter_getnet_payment.deeplink.StatusDeeplink
+import br.com.jclan.alphaxGetnetPayment.flutter_getnet_payment.services.DeviceInfo
 import br.com.jclan.alphaxGetnetPayment.flutter_getnet_payment.services.PrintService
 import com.getnet.posdigital.PosDigital
 
@@ -172,6 +173,13 @@ class FlutterGetnetPaymentPlugin: FlutterPlugin, MethodCallHandler, ActivityAwar
       }
       "info" -> {
         starDeeplink(infoDeeplink, Bundle())
+      }
+      "getSerialNumberAndDeviceModel" -> {
+        val deviceInfo = DeviceInfo().getSerialNumberAndDeviceModel()
+        resultScope?.success(mapOf(
+          "code" to "SUCCESS",
+          "data" to deviceInfo
+        ))
       }
       else ->  {
         resultScope?.error("ERROR", "Value of ", null)

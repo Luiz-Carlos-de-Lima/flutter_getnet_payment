@@ -6,10 +6,17 @@ class GetnetPrintPayload {
   GetnetPrintPayload({required this.printableContent});
 
   Map<String, dynamic> toJson() {
-    return {'printable_content': printableContent.map((e) => e.toJson()).toList()};
+    return {
+      'printable_content': printableContent.map((e) => e.toJson()).toList(),
+    };
   }
 
   static GetnetPrintPayload fromJson(Map json) {
-    return GetnetPrintPayload(printableContent: json['printable_content'].map<GetnetContentprint>((e) => GetnetContentprint.fromJson(e)).toList());
+    return GetnetPrintPayload(
+      printableContent:
+          json['printable_content']
+              .map<GetnetContentprint>((e) => GetnetContentprint.fromJson(e))
+              .toList(),
+    );
   }
 }

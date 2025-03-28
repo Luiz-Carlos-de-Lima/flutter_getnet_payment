@@ -114,16 +114,30 @@ class PaymentApp extends StatelessWidget {
                       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("info: ${info.toJson()}")));
                     } on GetnetInfoException catch (e) {
                       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.message)));
-                    } on GetnetPrintException catch (e) {
-                      ScaffoldMessenger.of(
-                        context,
-                      ).showSnackBar(SnackBar(content: Text("Não foi realizar a impressão das informações do terminal: ${e.message}")));
                     } catch (e) {
                       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erro desconhecido')));
                     }
                   },
                   style: ElevatedButton.styleFrom(backgroundColor: Colors.indigo, foregroundColor: Colors.white),
                   child: Text('Info'),
+                ),
+              ),
+              SizedBox(
+                width: 300,
+                height: 45,
+                child: ElevatedButton(
+                  onPressed: () async {
+                    try {
+                      final info = await flutterGetnetPaymentPlugin.deviceInfo();
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Device info: ${info.toJson()}")));
+                    } on GetnetInfoException catch (e) {
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.message)));
+                    } catch (e) {
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erro desconhecido')));
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(backgroundColor: Colors.pink, foregroundColor: Colors.white),
+                  child: Text('Device Info'),
                 ),
               ),
             ],

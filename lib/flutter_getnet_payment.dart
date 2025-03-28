@@ -1,3 +1,5 @@
+import 'package:flutter_getnet_payment/models/getnet_device_info.dart';
+
 import 'flutter_getnet_payment_platform_interface.dart';
 
 import 'models/getnet_pre_autorization_response.dart';
@@ -38,5 +40,9 @@ class FlutterGetnetPayment {
 
   Future<GetnetInfoResponse> info() {
     return FlutterGetnetPaymentPlatform.instance.info();
+  }
+
+  Future<GetnetDeviceInfo> deviceInfo() {
+    return FlutterGetnetPaymentPlatform.instance.deviceInfo();
   }
 }
