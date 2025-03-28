@@ -26,3 +26,6 @@
 
 # 1.1.4
 * fix optional parameters of GetStatusPaymentResponse
+
+# 1.1.5
+* add ignore break lines in GetnetContentPrint
