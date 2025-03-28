@@ -23,3 +23,6 @@
 
 # 1.1.3
 * fix bug deeplink access statusDeeplink
+
+# 1.1.4
+* fix optional parameters of GetStatusPaymentResponse
