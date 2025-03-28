@@ -129,7 +129,7 @@ class FlutterGetnetPaymentPlugin: FlutterPlugin, MethodCallHandler, ActivityAwar
           putString("callerId", call.argument<String>("callerId"))
           putBoolean("allowPrintCurrentTransaction", call.argument<Boolean>("allowPrintCurrentTransaction") ?: false)
         }
-        starDeeplink(paymentDeeplink, bundle)
+        starDeeplink(statusDeeplink, bundle)
       }
       "preAuthorization" -> {
         val bundle = Bundle().apply {

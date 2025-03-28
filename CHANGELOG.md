@@ -20,3 +20,6 @@
 
 # 1.1.2
 * fix bug returning pending transactions
+
+# 1.1.3
+* fix bug deeplink access statusDeeplink
