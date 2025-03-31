@@ -29,3 +29,6 @@
 
 # 1.1.5
 * add ignore break lines in GetnetContentPrint
+
+# 1.1.6
+* fixed attribute data 'refunded' from 'GetnetStatusPaymentResponse' is String, added cast to bool

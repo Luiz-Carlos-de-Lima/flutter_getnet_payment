@@ -32,6 +32,15 @@ class GetnetStatusPaymentResponse extends GetnetPaymentResponse {
   });
 
   static GetnetStatusPaymentResponse fromJson({required Map json}) {
+    bool refundData = false;
+    if (json['refunded'] is String) {
+      if (json['refunded'].toString().toLowerCase() == 'true') {
+        refundData = true;
+      } else {
+        refundData = false;
+      }
+    }
+
     return GetnetStatusPaymentResponse(
       result: json['result'],
       resultDetails: json['resultDetails'],
@@ -57,7 +66,7 @@ class GetnetStatusPaymentResponse extends GetnetPaymentResponse {
       printMerchantPreference: json['printMerchantPreference'],
       orderId: json['orderId'],
       pixPayloadResponse: json['pixPayloadResponse'],
-      refunded: json['refunded'],
+      refunded: refundData,
     );
   }
 
