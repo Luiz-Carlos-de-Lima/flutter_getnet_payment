@@ -1,7 +1,7 @@
-import 'package:flutter_getnet_payment/models/payment_response.dart';
+import 'package:flutter_getnet_payment/models/getnet_payment_response.dart';
 
-class PreAutorizationResponse extends PaymentResponse {
-  PreAutorizationResponse({
+class GetnetPreAutorizationResponse extends GetnetPaymentResponse {
+  GetnetPreAutorizationResponse({
     required super.result,
     super.resultDetails,
     required super.amount,
@@ -17,8 +17,8 @@ class PreAutorizationResponse extends PaymentResponse {
     super.inputType = "",
   });
 
-  static PreAutorizationResponse fromJson({required Map json}) {
-    return PreAutorizationResponse(
+  static GetnetPreAutorizationResponse fromJson({required Map json}) {
+    return GetnetPreAutorizationResponse(
       result: json['result'],
       resultDetails: json['resultDetails'],
       amount: int.parse(json['amount']) / 100,

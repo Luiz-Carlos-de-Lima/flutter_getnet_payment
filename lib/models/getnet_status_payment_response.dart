@@ -1,9 +1,9 @@
-import 'package:flutter_getnet_payment/models/payment_response.dart';
+import 'package:flutter_getnet_payment/models/getnet_payment_response.dart';
 
-class StatusPaymentResponse extends PaymentResponse {
+class GetnetStatusPaymentResponse extends GetnetPaymentResponse {
   final bool? refunded;
 
-  StatusPaymentResponse({
+  GetnetStatusPaymentResponse({
     required super.result,
     super.resultDetails,
     required super.amount,
@@ -31,19 +31,28 @@ class StatusPaymentResponse extends PaymentResponse {
     this.refunded = false,
   });
 
-  static StatusPaymentResponse fromJson({required Map json}) {
-    return StatusPaymentResponse(
+  static GetnetStatusPaymentResponse fromJson({required Map json}) {
+    bool refundData = false;
+    if (json['refunded'] is String) {
+      if (json['refunded'].toString().toLowerCase() == 'true') {
+        refundData = true;
+      } else {
+        refundData = false;
+      }
+    }
+
+    return GetnetStatusPaymentResponse(
       result: json['result'],
       resultDetails: json['resultDetails'],
-      amount: json['amount'],
-      callerId: json['callerId'],
-      nsu: json['nsu'],
+      amount: json['amount'] ?? 0.00,
+      callerId: json['callerId'] ?? 'this value of response is null',
+      nsu: json['nsu'] ?? 'this value of response is null',
       nsuLastSuccesfullMessage: json['nsuLastSuccesfullMessage'],
       cvNumber: json['cvNumber'],
-      receiptAlreadyPrinted: json['receiptAlreadyPrinted'],
-      type: json['type'],
+      receiptAlreadyPrinted: json['receiptAlreadyPrinted'] ?? false,
+      type: json['type'] ?? 'this value of response is null',
       brand: json['brand'],
-      inputType: json['inputType'],
+      inputType: json['inputType'] ?? 'this value of response is null',
       installments: json['installments'],
       gmtDateTime: json['gmtDateTime'],
       nsuLocal: json['nsuLocal'],
@@ -57,7 +66,7 @@ class StatusPaymentResponse extends PaymentResponse {
       printMerchantPreference: json['printMerchantPreference'],
       orderId: json['orderId'],
       pixPayloadResponse: json['pixPayloadResponse'],
-      refunded: json['refunded'],
+      refunded: refundData,
     );
   }
 

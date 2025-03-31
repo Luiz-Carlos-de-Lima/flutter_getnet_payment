@@ -1,4 +1,4 @@
-class RefundPayload {
+class GetnetRefundPayload {
   final double amount;
 
   /// Data da transação a ser estornada. caso null vai assumir o dia corrente. Enviar no formato: “dd/MM/yyyy”
@@ -7,7 +7,7 @@ class RefundPayload {
   final String? originTerminal;
   final String? allowPrintCurrentTransaction;
 
-  RefundPayload({
+  GetnetRefundPayload({
     required this.amount,
     this.transactionDate,
     this.cvNumber,
@@ -15,8 +15,8 @@ class RefundPayload {
     this.allowPrintCurrentTransaction,
   });
 
-  static RefundPayload fromJson(Map<String, dynamic> map) {
-    return RefundPayload(
+  static GetnetRefundPayload fromJson(Map<String, dynamic> map) {
+    return GetnetRefundPayload(
       amount: int.parse(map['amount']) / 100,
       transactionDate: map['transactionDate'],
       cvNumber: map['cvNumber'],

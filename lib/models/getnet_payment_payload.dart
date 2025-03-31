@@ -1,20 +1,20 @@
-import 'package:flutter_getnet_payment/constants/credit_type.dart';
-import 'package:flutter_getnet_payment/constants/currency_position.dart';
-import 'package:flutter_getnet_payment/constants/payment_type.dart';
+import 'package:flutter_getnet_payment/constants/getnet_credit_type.dart';
+import 'package:flutter_getnet_payment/constants/getnet_currency_position.dart';
+import 'package:flutter_getnet_payment/constants/getnet_payment_type.dart';
 
-class PaymentPayload {
+class GetnetPaymentPayload {
   final String callerId;
-  final CurrencyPosition currencyPosition;
+  final GetnetCurrencyPosition currencyPosition;
   final int currencyCode;
-  final PaymentType paymentType;
-  final CreditType? creditType;
+  final GetnetPaymentType paymentType;
+  final GetnetCreditType? creditType;
   final int? installments;
   final double amount;
   final String orderId;
 
-  PaymentPayload({
+  GetnetPaymentPayload({
     required this.paymentType,
-    this.currencyPosition = CurrencyPosition.CURRENCY_BEFORE_AMOUNT,
+    this.currencyPosition = GetnetCurrencyPosition.CURRENCY_BEFORE_AMOUNT,
     this.currencyCode = 986,
     this.creditType,
     this.installments,
@@ -22,7 +22,7 @@ class PaymentPayload {
     required this.callerId,
     required this.orderId,
   }) : assert(
-         paymentType != PaymentType.credit ||
+         paymentType != GetnetPaymentType.credit ||
              creditType == null ||
              (installments != null && installments > 1),
          "Installments cannot be null and must be greater than 1 when paymentType is 'credit' and creditType is 'creditMerchant' or 'creditIssuer'.",
@@ -36,17 +36,19 @@ class PaymentPayload {
          'orderId size must be less than or equal to 50 characters',
        );
 
-  static PaymentPayload fromJson(Map map) {
-    return PaymentPayload(
-      paymentType: PaymentType.values.byName(map['paymentType']),
-      currencyPosition: CurrencyPosition.values.byName(map['currencyPosition']),
+  static GetnetPaymentPayload fromJson(Map map) {
+    return GetnetPaymentPayload(
+      paymentType: GetnetPaymentType.values.byName(map['paymentType']),
+      currencyPosition: GetnetCurrencyPosition.values.byName(
+        map['currencyPosition'],
+      ),
       currencyCode:
           map['currencyCode'] != null
               ? (map['currencyCode'] as num).toInt()
               : 986,
       creditType:
           map['creditType'] != null
-              ? CreditType.values.byName(map['creditType'])
+              ? GetnetCreditType.values.byName(map['creditType'])
               : null,
       installments:
           map['installments'] != null

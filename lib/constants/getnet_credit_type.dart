@@ -1,0 +1,1 @@
+enum GetnetCreditType { creditMerchant, creditIssuer }

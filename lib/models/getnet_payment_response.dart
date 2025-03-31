@@ -1,4 +1,4 @@
-class PaymentResponse {
+class GetnetPaymentResponse {
   final String result;
   final String? resultDetails;
   final double amount;
@@ -24,7 +24,7 @@ class PaymentResponse {
   final String? orderId;
   final String? pixPayloadResponse;
 
-  PaymentResponse({
+  GetnetPaymentResponse({
     required this.result,
     this.resultDetails,
     required this.amount,
@@ -51,8 +51,8 @@ class PaymentResponse {
     this.pixPayloadResponse,
   });
 
-  static PaymentResponse fromJson(Map map) {
-    return PaymentResponse(
+  static GetnetPaymentResponse fromJson(Map map) {
+    return GetnetPaymentResponse(
       result: map['result'],
       resultDetails: map['resultDetails'],
       amount: int.parse(map['amount']) / 100,

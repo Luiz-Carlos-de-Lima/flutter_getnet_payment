@@ -1,16 +1,17 @@
-import 'package:flutter_getnet_payment/models/info_response.dart';
-import 'package:flutter_getnet_payment/models/payment_response.dart';
-import 'package:flutter_getnet_payment/models/pre_autorization_response.dart';
-import 'package:flutter_getnet_payment/models/print_payload.dart';
-import 'package:flutter_getnet_payment/models/refund_payload.dart';
-import 'package:flutter_getnet_payment/models/refund_response.dart';
-import 'package:flutter_getnet_payment/models/status_payment_payload.dart';
-import 'package:flutter_getnet_payment/models/status_payment_response.dart';
+import 'package:flutter_getnet_payment/models/getnet_device_info.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
-
 import 'flutter_getnet_payment_method_channel.dart';
-import 'models/payment_payload.dart';
-import 'models/pre_autorization_payload.dart';
+
+import 'models/getnet_pre_autorization_response.dart';
+import 'models/getnet_pre_autorization_payload.dart';
+import 'models/getnet_status_payment_response.dart';
+import 'models/getnet_status_payment_payload.dart';
+import 'models/getnet_payment_response.dart';
+import 'models/getnet_refund_response.dart';
+import 'models/getnet_payment_payload.dart';
+import 'models/getnet_refund_payload.dart';
+import 'models/getnet_info_response.dart';
+import 'models/getnet_print_payload.dart';
 
 abstract class FlutterGetnetPaymentPlatform extends PlatformInterface {
   /// Constructs a FlutterGetnetPaymentPlatform.
@@ -18,8 +19,7 @@ abstract class FlutterGetnetPaymentPlatform extends PlatformInterface {
 
   static final Object _token = Object();
 
-  static FlutterGetnetPaymentPlatform _instance =
-      MethodChannelFlutterGetnetPayment();
+  static FlutterGetnetPaymentPlatform _instance = MethodChannelFlutterGetnetPayment();
 
   /// The default instance of [FlutterGetnetPaymentPlatform] to use.
   ///
@@ -34,27 +34,23 @@ abstract class FlutterGetnetPaymentPlatform extends PlatformInterface {
     _instance = instance;
   }
 
-  Future<PaymentResponse> pay({required PaymentPayload paymentPayload}) {
+  Future<GetnetPaymentResponse> pay({required GetnetPaymentPayload paymentPayload}) {
     throw UnimplementedError('platformVersion() has not been implemented.');
   }
 
-  Future<StatusPaymentResponse> statusPayment({
-    required StatusPaymentPayload statusPaymentPayload,
-  }) async {
+  Future<GetnetStatusPaymentResponse> statusPayment({required GetnetStatusPaymentPayload statusPaymentPayload}) async {
     throw UnimplementedError('statusPayment() has not been implemented.');
   }
 
-  Future<PreAutorizationResponse> preAutorization({
-    required PreAutorizationPayload preAutorizationPayload,
-  }) {
+  Future<GetnetPreAutorizationResponse> preAutorization({required GetnetPreAutorizationPayload preAutorizationPayload}) {
     throw UnimplementedError('preAutorization() has not been implemented.');
   }
 
-  Future<RefundResponse> refund({required RefundPayload refundPayload}) {
+  Future<GetnetRefundResponse> refund({required GetnetRefundPayload refundPayload}) {
     throw UnimplementedError('refund() has not been implemented.');
   }
 
-  Future<void> print({required PrintPayload printPayload}) {
+  Future<void> print({required GetnetPrintPayload printPayload}) {
     throw UnimplementedError('print() has not been implemented.');
   }
 
@@ -62,7 +58,11 @@ abstract class FlutterGetnetPaymentPlatform extends PlatformInterface {
     throw UnimplementedError('reprint() has not been implemented.');
   }
 
-  Future<InfoResponse> info() async {
+  Future<GetnetInfoResponse> info() async {
     throw UnimplementedError('info() has not been implemented.');
+  }
+
+  Future<GetnetDeviceInfo> deviceInfo() {
+    throw UnimplementedError('deviceInfo() has not been implemented.');
   }
 }

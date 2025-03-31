@@ -1,13 +1,13 @@
-import 'package:flutter_getnet_payment/models/payment_response.dart';
+import 'package:flutter_getnet_payment/models/getnet_payment_response.dart';
 
-class RefundResponse extends PaymentResponse {
+class GetnetRefundResponse extends GetnetPaymentResponse {
   final String? nsuLastSuccessfullMessage;
   final String? refundTransactionDate;
   final String? refundCvNumber;
 
   final String refundOriginTerminal;
 
-  RefundResponse({
+  GetnetRefundResponse({
     required super.result,
     super.resultDetails,
     required super.amount,
@@ -38,8 +38,8 @@ class RefundResponse extends PaymentResponse {
     required this.refundOriginTerminal,
   });
 
-  static RefundResponse fromJson({required Map json}) {
-    return RefundResponse(
+  static GetnetRefundResponse fromJson({required Map json}) {
+    return GetnetRefundResponse(
       result: json['result'],
       resultDetails: json['resultDetails'],
       amount: int.parse(json['amount']) / 100,

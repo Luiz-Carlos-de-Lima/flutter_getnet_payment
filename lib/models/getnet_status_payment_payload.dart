@@ -1,14 +1,14 @@
-class StatusPaymentPayload {
+class GetnetStatusPaymentPayload {
   final String callerId;
   final bool allowPrintCurrentTransaction;
 
-  StatusPaymentPayload({
+  GetnetStatusPaymentPayload({
     required this.callerId,
     this.allowPrintCurrentTransaction = false,
   });
 
-  static StatusPaymentPayload fromJson(Map map) {
-    return StatusPaymentPayload(
+  static GetnetStatusPaymentPayload fromJson(Map map) {
+    return GetnetStatusPaymentPayload(
       callerId: map['callerId'],
       allowPrintCurrentTransaction: map['allowPrintCurrentTransaction'],
     );
