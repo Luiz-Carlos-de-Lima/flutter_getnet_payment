@@ -32,3 +32,6 @@
 
 # 1.1.6
 * fixed attribute data 'refunded' from 'GetnetStatusPaymentResponse' is String, added cast to bool
+
+# 1.1.7
+* fixed inputType attribute is null in 'GetnetStatusPaymentResponse' when payment is of type 'PIX'

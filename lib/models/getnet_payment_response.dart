@@ -9,7 +9,7 @@ class GetnetPaymentResponse {
   final bool receiptAlreadyPrinted;
   final String type;
   final String? brand;
-  final String inputType;
+  final String? inputType;
   final String? installments;
   final String? gmtDateTime;
   final String? nsuLocal;
@@ -35,7 +35,7 @@ class GetnetPaymentResponse {
     required this.receiptAlreadyPrinted,
     required this.type,
     this.brand,
-    required this.inputType,
+    this.inputType,
     this.installments,
     this.gmtDateTime,
     this.nsuLocal,
