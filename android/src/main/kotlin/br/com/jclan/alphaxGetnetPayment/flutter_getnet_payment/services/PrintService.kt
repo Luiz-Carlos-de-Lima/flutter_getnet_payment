@@ -15,14 +15,15 @@ import com.getnet.posdigital.printer.PrinterStatus
 
 
 class PrintService {
-    private val printer: IPrinterService = PosDigital.getInstance().printer
+    private var printer: IPrinterService? = null
 
     fun start(printableContent: List<Bundle>?) : Bundle {
         try {
             if (PosDigital.getInstance().isInitiated){
             validatePrintContent(printableContent)
-            printer.init()
-            printer.setGray(5)
+                printer =  PosDigital.getInstance().printer
+            printer!!.init()
+            printer!!.setGray(5)
             setValuePrint(printableContent!!)
 
             val callback = object : com.getnet.posdigital.printer.IPrinterCallback {
@@ -39,9 +40,9 @@ class PrintService {
                 }
             }
 
-            printer.printAndRemovePaper(callback)
+            printer!!.printAndRemovePaper(callback)
 
-            when(printer.status) {
+            when(printer!!.status) {
                 PrinterStatus.OK -> {
                     return Bundle().apply {
                         putString("code", "SUCCESS")
@@ -182,68 +183,70 @@ class PrintService {
     }
 
     private fun setValuePrint (printableContent: List<Bundle>) {
-        for (content: Bundle in printableContent) {
-            val type: String = content.getString("type")!!
-            when (type) {
-                "text" -> {
-                    val contentOfType: String? = content.getString("content")
-                    val align: String? = content.getString("align")
-                    val size: String? = content.getString("size")
+        if (printer != null) {
+            for (content: Bundle in printableContent) {
+                val type: String = content.getString("type")!!
+                when (type) {
+                    "text" -> {
+                        val contentOfType: String? = content.getString("content")
+                        val align: String? = content.getString("align")
+                        val size: String? = content.getString("size")
 
-                    val formatSize = when (size) {
-                        "small" -> {
-                            FontFormat.SMALL
+                        val formatSize = when (size) {
+                            "small" -> {
+                                FontFormat.SMALL
+                            }
+
+                            "medium" -> {
+                                FontFormat.MEDIUM
+                            }
+
+                            "big" -> {
+                                FontFormat.LARGE
+                            }
+
+                            else -> {
+                                FontFormat.MEDIUM
+                            }
                         }
 
-                        "medium" -> {
-                            FontFormat.MEDIUM
+                        val alignMode = when (align) {
+                            "left" -> {
+                                AlignMode.LEFT
+                            }
+
+                            "center" -> {
+                                AlignMode.CENTER
+                            }
+
+                            "right" -> {
+                                AlignMode.RIGHT
+                            }
+
+                            else -> {
+                                AlignMode.LEFT
+                            }
                         }
 
-                        "big" -> {
-                            FontFormat.LARGE
-                        }
 
-                        else -> {
-                            FontFormat.MEDIUM
-                        }
+                        printer!!.defineFontFormat(formatSize)
+                        printer!!.addText(alignMode, contentOfType ?: "Conteúdo para imprimir null")
                     }
-
-                    val alignMode = when (align) {
-                        "left" -> {
-                            AlignMode.LEFT
-                        }
-
-                        "center" -> {
-                            AlignMode.CENTER
-                        }
-
-                        "right" -> {
-                            AlignMode.RIGHT
-                        }
-
-                        else -> {
-                            AlignMode.LEFT
-                        }
+                    "line" -> {
+                        printer!!.defineFontFormat(FontFormat.MEDIUM)
+                        printer!!.addText(AlignMode.LEFT, content.getString("content") ?: "Conteúdo para imprimir null")
                     }
-
-
-                    printer.defineFontFormat(formatSize)
-                    printer.addText(alignMode, contentOfType ?: "Conteúdo para imprimir null")
-                }
-                "line" -> {
-                    printer.defineFontFormat(FontFormat.MEDIUM)
-                    printer.addText(AlignMode.LEFT, content.getString("content") ?: "Conteúdo para imprimir null")
-                }
-                "image" -> {
-                    val imagePath = content.getString("imagePath")
-                    printer.addImageBitmap(AlignMode.CENTER, decodeBase64ToBitmap(imagePath))
-                }
-                else -> {
-                    throw IllegalArgumentException("Invalid printable_content data: Invalid type")
+                    "image" -> {
+                        val imagePath = content.getString("imagePath")
+                        printer!!.addImageBitmap(AlignMode.CENTER, decodeBase64ToBitmap(imagePath))
+                    }
+                    else -> {
+                        throw IllegalArgumentException("Invalid printable_content data: Invalid type")
+                    }
                 }
             }
+            printer!!.addText(AlignMode.LEFT, "\n\n")
         }
-        printer.addText(AlignMode.LEFT, "\n\n")
     }
 
     private fun decodeBase64ToBitmap(base64String: String?): Bitmap {

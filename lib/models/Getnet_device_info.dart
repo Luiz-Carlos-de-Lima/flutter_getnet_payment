@@ -10,5 +10,5 @@ class GetnetDeviceInfo {
 
   Map<String, dynamic> toJson() {
     return {'serialNumber': seriallNumber, 'deviceModel': deviceModel};
-  }
+  } 
 }

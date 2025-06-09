@@ -35,3 +35,6 @@
 
 # 1.1.7
 * fixed inputType attribute is null in 'GetnetStatusPaymentResponse' when payment is of type 'PIX'
+
+# 1.1.8
+* fixed bugs

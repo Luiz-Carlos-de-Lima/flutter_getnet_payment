@@ -35,14 +35,13 @@ class FlutterGetnetPaymentPlugin: FlutterPlugin, MethodCallHandler, ActivityAwar
   private var resultScope: Result? = null
 
   override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
-
     channel = MethodChannel(flutterPluginBinding.binaryMessenger, "flutter_getnet_payment")
     channel.setMethodCallHandler(this)
   }
 
   override fun onAttachedToActivity(newBinding: ActivityPluginBinding) {
     binding = newBinding
-    PosDigital.register(binding!!.activity, bindCallback)
+    connectPosDigitalService()
     binding?.addActivityResultListener { requestCode: Int, resultCode: Int, intent: Intent? ->
       if(Activity.RESULT_OK == resultCode) {
         var responseMap: Map<String, Any?> = mapOf()
@@ -239,6 +238,11 @@ class FlutterGetnetPaymentPlugin: FlutterPlugin, MethodCallHandler, ActivityAwar
     return bundle
   }
 
+  private fun connectPosDigitalService() {
+    Log.d("Register PosDigital","PosDigital connecting!")
+    PosDigital.register(binding!!.activity, bindCallback)
+  }
+
   private val bindCallback: PosDigital.BindCallback
     get() = object : PosDigital.BindCallback {
       override fun onError(e: Exception) {
@@ -253,8 +257,4 @@ class FlutterGetnetPaymentPlugin: FlutterPlugin, MethodCallHandler, ActivityAwar
         Log.d("Register PosDigital","PosDigital disconnected!")
       }
     }
-
-  private fun connectPosDigitalService() {
-    PosDigital.register(binding!!.activity, bindCallback)
-  }
 }
