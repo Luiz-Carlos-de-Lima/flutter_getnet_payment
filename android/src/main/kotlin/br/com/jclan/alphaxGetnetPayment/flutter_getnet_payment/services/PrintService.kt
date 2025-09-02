@@ -8,129 +8,52 @@ import com.getnet.posdigital.printer.FontFormat
 import com.getnet.posdigital.printer.IPrinterService
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.os.Binder
-import android.os.IBinder
 import android.util.Base64;
+import com.getnet.posdigital.printer.IPrinterCallback
 import com.getnet.posdigital.printer.PrinterStatus
+import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
 
 
 class PrintService {
     private var printer: IPrinterService? = null
 
-    fun start(printableContent: List<Bundle>?) : Bundle {
+    fun start(
+        printerCallback: IPrinterCallback,
+        printableContent: List<Bundle>?,
+        binding: ActivityPluginBinding
+    ): Bundle {
         try {
             if (PosDigital.getInstance().isInitiated){
-            validatePrintContent(printableContent)
-                printer =  PosDigital.getInstance().printer
-            printer!!.init()
-            printer!!.setGray(5)
-            setValuePrint(printableContent!!)
+                Worker.postToWorkerThread {
+                    try {
+                        validatePrintContent(printableContent)
+                        printer =  PosDigital.getInstance().printer
+                        printer!!.init()
 
-            val callback = object : com.getnet.posdigital.printer.IPrinterCallback {
-                override fun asBinder(): IBinder {
-                    return Binder()
+                        val bitmap: Bitmap = GenerateBitmap()
+                            .convertPrintableItemsToBitmap(binding.activity, printableContent!!)
+                            ?: throw IllegalStateException("Não foi possível gerar o bitmap de impressão!")
+
+                        printer!!.addImageBitmap(0, bitmap)
+                        printer!!.printAndRemovePaper(printerCallback)
+
+                        if (printer!!.status == PrinterStatus.OK || printer!!.status == PrinterStatus.PRINTING) {
+                            printerCallback.onSuccess()
+                        } else {
+                            printerCallback.onError(printer!!.status)
+                        }
+                    } catch (e: IllegalArgumentException) {
+                        printerCallback.onError(1000)
+                    } catch (e: IllegalStateException) {
+                        printerCallback.onError(1000)
+                    } catch (e: Exception) {
+                        printerCallback.onError(1000)
+                    }
                 }
 
-                override fun onSuccess() {
-                    println("Impressão concluída com sucesso!")
-                }
-
-                override fun onError(p0: Int) {
-                    println("Impressão não concluída")
-                }
-            }
-
-            printer!!.printAndRemovePaper(callback)
-
-            when(printer!!.status) {
-                PrinterStatus.OK -> {
-                    return Bundle().apply {
-                        putString("code", "SUCCESS")
-                        putString("message", "OK")
-                    }
-                }
-                PrinterStatus.PRINTING -> {
-                    return Bundle().apply {
-                        putString("code", "SUCCESS")
-                        putString("message", "Imprimindo")
-                    }
-                }
-                PrinterStatus.ERROR_NOT_INIT -> return Bundle().apply {
-                    putString("code", "ERROR")
-                    putString("message", "Impressora não iniciada")
-                }
-                PrinterStatus.ERROR_OVERHEAT -> {
-                    return Bundle().apply {
-                        putString("code", "ERROR")
-                        putString("message", "Impressora não iniciada")
-                    }
-                }
-                PrinterStatus.ERROR_BUFOVERFLOW -> {
-                    return Bundle().apply {
-                        putString("code", "ERROR")
-                        putString("message", "Impressora superaquecida")
-                    }
-                }
-                PrinterStatus.ERROR_PARAM -> {
-                    return Bundle().apply {
-                        putString("code", "ERROR")
-                        putString("message", "Fila de impressão muito grande")
-                    }
-                }
-                PrinterStatus.ERROR_LIFTHEAD -> {
-                    return Bundle().apply {
-                        putString("code", "ERROR")
-                        putString("message", "Parâmetros incorretos")
-                    }
-                }
-                PrinterStatus.ERROR_LOWTEMP -> {
-                    return Bundle().apply {
-                        putString("code", "ERROR")
-                        putString("message", "Porta da impressora aberta")
-                    }
-                }
-                PrinterStatus.ERROR_LOWVOL -> {
-                    return Bundle().apply {
-                        putString("code", "ERROR")
-                        putString("message", "Temperatura baixa demais para impressão")
-                    }
-                }
-                PrinterStatus.ERROR_MOTORERR -> {
-                    return Bundle().apply {
-                        putString("code", "ERROR")
-                        putString("message", "Sem bateria suficiente para impressão")
-                    }
-                }
-                PrinterStatus.ERROR_NO_PAPER -> {
-                    return Bundle().apply {
-                        putString("code", "ERROR")
-                        putString("message", "Motor de passo com problemas")
-                    }
-                }
-                PrinterStatus.ERROR_PAPERENDING -> {
-                    return Bundle().apply {
-                        putString("code", "ERROR")
-                        putString("message", "Sem bobina")
-                    }
-                }
-                PrinterStatus.ERROR_PAPERJAM -> {
-                    return Bundle().apply {
-                        putString("code", "ERROR")
-                        putString("message", "Bobina acabando")
-                    }
-                }
-                PrinterStatus.UNKNOW -> {
-                    return Bundle().apply {
-                        putString("code", "ERROR")
-                        putString("message", "Não foi possível definir o erro")
-                    }
-                }
-                else -> {
-                    return Bundle().apply {
-                        putString("code", "ERROR")
-                        putString("message", "Impressora não iniciada")
-                    }
-                }
+                return Bundle().apply {
+                    putString("code", "SUCCESS")
+                    putBoolean("data", true)
                 }
             } else {
                 return Bundle().apply {

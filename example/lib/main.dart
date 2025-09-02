@@ -567,26 +567,83 @@ class _PrintPage extends StatefulWidget {
 }
 
 class _PrintPageState extends State<_PrintPage> {
-  final _flutterGetnetPaymentPlugin = FlutterGetnetPayment();
   final _printTextEC = TextEditingController();
+  final _imagePathEC = TextEditingController();
   final List<DropdownMenuItem<GetnetPrintType>> _listPrintType = GetnetPrintType.values.map((e) => DropdownMenuItem(value: e, child: Text(e.name))).toList();
   final List<DropdownMenuItem<GetnetPrintAlign>> _listPrintAlign = GetnetPrintAlign.values.map((e) => DropdownMenuItem(value: e, child: Text(e.name))).toList();
   final List<DropdownMenuItem<GetnetPrintSize>> _listPrintSize = GetnetPrintSize.values.map((e) => DropdownMenuItem(value: e, child: Text(e.name))).toList();
 
   GetnetPrintType _printType = GetnetPrintType.line;
-  GetnetPrintAlign? _printAlign = GetnetPrintAlign.center;
-  GetnetPrintSize _printSize = GetnetPrintSize.medium;
+  GetnetPrintAlign? _printAlign;
+  GetnetPrintSize? _printSize;
+  bool _ignoreLineBreak = false;
+  String? _defaultImage64;
+  List<Map> _previewBase64 = [];
+
+  final List<GetnetContentprint> _receiptContent = [];
 
   @override
   void initState() {
     super.initState();
+    _loadDefaultImage();
+  }
+
+  @override
+  void dispose() {
+    _printTextEC.dispose();
+    _imagePathEC.dispose();
+    super.dispose();
+  }
+
+  Future<void> _loadDefaultImage() async {
+    final image64 = await imageToBase64('https://css-tricks.com/wp-content/uploads/2022/08/flutter-clouds.jpg');
+    setState(() {
+      _defaultImage64 = image64;
+      if (_imagePathEC.text.isEmpty && image64 != null) {
+        _imagePathEC.text = image64;
+      }
+    });
+  }
+
+  void _addToReceipt() {
+    String? image64;
+    if (_printType == GetnetPrintType.image) {
+      image64 = _imagePathEC.text.isNotEmpty ? _imagePathEC.text : _defaultImage64;
+      if (image64 == null || image64.isEmpty) return;
+    }
+    if (_printType != GetnetPrintType.image && _printTextEC.text.isEmpty) return;
+
+    final item = GetnetContentprint(
+      type: _printType,
+      align: _printAlign,
+      content: _printTextEC.text,
+      size: _printSize,
+      imagePath: image64,
+      ignoreLineBreak: _ignoreLineBreak,
+    );
+    setState(() {
+      _receiptContent.add(item);
+      _printTextEC.clear();
+    });
+  }
+
+  void _removeLine(int index) {
+    setState(() {
+      _receiptContent.removeAt(index);
+    });
+  }
+
+  void _clearReceipt() {
+    setState(() {
+      _receiptContent.clear();
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
-        appBar: AppBar(title: Text('impresssão'), centerTitle: true, leading: Container()),
+        appBar: AppBar(title: Text('Impressão'), centerTitle: true, leading: Container()),
         body: Center(
           child: SingleChildScrollView(
             child: Padding(
@@ -606,74 +663,145 @@ class _PrintPageState extends State<_PrintPage> {
                       isExpanded: true,
                       underline: Container(),
                       onChanged: (value) {
-                        _printType = value!;
-                        if (_printType == GetnetPrintType.text) {
-                          _printAlign = GetnetPrintAlign.center;
-                          _printSize = GetnetPrintSize.medium;
-                        } else {
-                          _printAlign = GetnetPrintAlign.left;
-                          _printSize = GetnetPrintSize.medium;
-                        }
-                        setState(() {});
+                        setState(() {
+                          _printType = value!;
+                          if (_printType == GetnetPrintType.text) {
+                            _printAlign = GetnetPrintAlign.center;
+                            _printSize = GetnetPrintSize.medium;
+                          } else {
+                            _printAlign = null;
+                            _printSize = null;
+                          }
+                        });
                       },
                     ),
                   ),
-                  if (_printType == GetnetPrintType.text)
+                  if (_printType == GetnetPrintType.text) ...[
+                    SizedBox(height: 10),
+                    Align(alignment: Alignment.centerLeft, child: Text('Alinhamento da Impressão')),
+                    SizedBox(height: 10),
+                    Container(
+                      padding: const EdgeInsets.all(10.0),
+                      decoration: BoxDecoration(border: Border.all(), borderRadius: BorderRadius.circular(5)),
+                      height: 55,
+                      child: DropdownButton(
+                        value: _printAlign,
+                        items: _listPrintAlign,
+                        isExpanded: true,
+                        underline: Container(),
+                        onChanged: (value) {
+                          setState(() {
+                            _printAlign = value!;
+                          });
+                        },
+                      ),
+                    ),
+                    SizedBox(height: 10),
+                    Align(alignment: Alignment.centerLeft, child: Text('Tamanho da Impressão')),
+                    SizedBox(height: 10),
+                    Container(
+                      padding: const EdgeInsets.all(10.0),
+                      decoration: BoxDecoration(border: Border.all(), borderRadius: BorderRadius.circular(5)),
+                      height: 55,
+                      child: DropdownButton(
+                        value: _printSize,
+                        items: _listPrintSize,
+                        isExpanded: true,
+                        underline: Container(),
+                        onChanged: (value) {
+                          setState(() {
+                            _printSize = value!;
+                          });
+                        },
+                      ),
+                    ),
+                    SwitchListTile(
+                      title: Text('Ignorar Quebra de Linha'),
+                      value: _ignoreLineBreak,
+                      onChanged: (val) {
+                        setState(() {
+                          _ignoreLineBreak = val;
+                        });
+                      },
+                    ),
+                  ],
+                  if (_printType != GetnetPrintType.image)
                     Column(
                       children: [
                         SizedBox(height: 10),
-                        Align(alignment: Alignment.centerLeft, child: Text('Alinhamento da Impressão')),
+                        Align(alignment: Alignment.centerLeft, child: Text('Texto para Impressão')),
                         SizedBox(height: 10),
-                        Container(
-                          padding: const EdgeInsets.all(10.0),
-                          decoration: BoxDecoration(border: Border.all(), borderRadius: BorderRadius.circular(5)),
-                          height: 55,
-                          child: DropdownButton(
-                            value: _printAlign,
-                            items: _listPrintAlign,
-                            isExpanded: true,
-                            underline: Container(),
-                            onChanged: (value) {
-                              _printAlign = value!;
-                              setState(() {});
-                            },
+                        TextFormField(controller: _printTextEC, decoration: InputDecoration(hintText: 'Texto', border: OutlineInputBorder())),
+                      ],
+                    )
+                  else
+                    Column(
+                      children: [
+                        SizedBox(height: 10),
+                        Align(alignment: Alignment.centerLeft, child: Text('Base64 da Imagem')),
+                        SizedBox(height: 10),
+                        TextFormField(
+                          controller: _imagePathEC,
+                          decoration: InputDecoration(hintText: 'Cole o Base64 da imagem', border: OutlineInputBorder()),
+                          minLines: 2,
+                          maxLines: 4,
+                        ),
+                        if (_defaultImage64 != null)
+                          Padding(padding: const EdgeInsets.symmetric(vertical: 10), child: Image.memory(base64Decode(_defaultImage64!))),
+                      ],
+                    ),
+                  SizedBox(height: 10),
+                  Row(
+                    children: [
+                      Expanded(child: ElevatedButton(onPressed: _addToReceipt, child: Text('Adicionar ao Recibo'))),
+                      SizedBox(width: 10),
+                      Expanded(child: ElevatedButton(onPressed: _receiptContent.isEmpty ? null : _clearReceipt, child: Text('Remover tudo'))),
+                    ],
+                  ),
+                  Divider(height: 32),
+                  if (_receiptContent.isNotEmpty)
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Conteúdo do Recibo:', style: TextStyle(fontWeight: FontWeight.bold)),
+                        ..._receiptContent.asMap().entries.map(
+                          (entry) => Card(
+                            margin: EdgeInsets.symmetric(vertical: 4),
+                            child: ListTile(
+                              title: Text(entry.value.type.name),
+                              subtitle: Text(entry.value.type == GetnetPrintType.image ? 'Imagem' : (entry.value.content ?? '')),
+                              trailing: IconButton(
+                                icon: Icon(Icons.delete, color: Colors.red),
+                                tooltip: 'Remover linha',
+                                onPressed: () => _removeLine(entry.key),
+                              ),
+                            ),
                           ),
                         ),
                       ],
                     ),
-                  if (_printType == GetnetPrintType.text)
-                    Column(
-                      children: [
-                        SizedBox(height: 10),
-                        Align(alignment: Alignment.centerLeft, child: Text('Tamanho da Impressão')),
-                        SizedBox(height: 10),
-                        Container(
-                          padding: const EdgeInsets.all(10.0),
-                          decoration: BoxDecoration(border: Border.all(), borderRadius: BorderRadius.circular(5)),
-                          height: 55,
-                          child: DropdownButton(
-                            value: _printSize,
-                            items: _listPrintSize,
-                            isExpanded: true,
-                            underline: Container(),
-                            onChanged: (value) {
-                              _printSize = value!;
-                              setState(() {});
-                            },
-                          ),
-                        ),
-                      ],
-                    ),
-                  (_printType != GetnetPrintType.image)
-                      ? Column(
-                        children: [
-                          SizedBox(height: 10),
-                          Align(alignment: Alignment.centerLeft, child: Text('Texto para Impressão')),
-                          SizedBox(height: 10),
-                          TextFormField(controller: _printTextEC, decoration: InputDecoration(hintText: 'Texto', border: OutlineInputBorder())),
-                        ],
-                      )
-                      : Column(children: [Image.network('https://zup.com.br/wp-content/uploads/2021/03/5ce2fde702ef93c1e994d987_flutter.png')]),
+                  SizedBox(height: 20),
+                  if (_previewBase64.isNotEmpty) ...[
+                    Text("Pré-visualização:", style: TextStyle(fontWeight: FontWeight.bold)),
+                    SizedBox(height: 10),
+                    ...List.generate(_previewBase64.length, (index) {
+                      if (_previewBase64[index]['imageBase64'] is String && _previewBase64[index]['imageBase64'].isNotEmpty) {
+                        return Column(
+                          children: [
+                            if (_previewBase64[index]['messageError'] != null)
+                              Padding(
+                                padding: const EdgeInsets.symmetric(vertical: 10),
+                                child: Text(_previewBase64[index]['messageError'], style: TextStyle(color: Colors.red)),
+                              ),
+                            Padding(padding: const EdgeInsets.symmetric(vertical: 10), child: Image.memory(base64Decode(_previewBase64[index]['imageBase64']))),
+                          ],
+                        );
+                      }
+
+                      return SizedBox.shrink();
+                    }),
+                    SizedBox(height: 10),
+                  ],
                 ],
               ),
             ),
@@ -700,27 +828,67 @@ class _PrintPageState extends State<_PrintPage> {
                 child: SizedBox(
                   height: 40,
                   child: ElevatedButton(
-                    onPressed: () async {
-                      try {
-                        String? image64;
-                        if (_printType == GetnetPrintType.image) {
-                          image64 = await imageToBase64('https://zup.com.br/wp-content/uploads/2021/03/5ce2fde702ef93c1e994d987_flutter.png');
-                        }
-                        final print = GetnetPrintPayload(
-                          printableContent: [
-                            GetnetContentprint(type: _printType, align: _printAlign, content: _printTextEC.text, size: _printSize, imagePath: image64),
-                          ],
-                        );
-                        await _flutterGetnetPaymentPlugin.print(printPayload: print);
-                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Impressão realizada com sucesso!")));
-                      } on GetnetPrintException catch (e) {
-                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.message)));
-                      } catch (e) {
-                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erro desconhecido')));
-                      }
-                    },
+                    onPressed:
+                        _receiptContent.isEmpty
+                            ? null
+                            : () async {
+                              try {
+                                final print = GetnetPrintPayload(
+                                  printableContent: List<GetnetContentprint>.from([
+                                    GetnetContentprint(
+                                      type: GetnetPrintType.text,
+                                      align: GetnetPrintAlign.left,
+                                      size: GetnetPrintSize.small,
+                                      ignoreLineBreak: true,
+                                      content: '''                 JCLAN SISTEMAS                 
+------------------------------------------------
+          BAR           
+================================================
+Comanda: 44             
+------------------------------------------------
+Entregar na Mesa: 12                            
+------------------------------------------------
+IMP: 01/2 (BR)                                  
+At: 0 - Suporte                                 
+Term: 1                       Dt: 25/08/25 11:01
+================================================
+Qtde - Produto                                  
+------------------------------------------------
+1 - FANTA UVA                                   
+------------------------------------------------
+                  Data Impressao: 25/08/25 11:01
+                                                                 JCLAN SISTEMAS                 
+------------------------------------------------
+          BAR           
+================================================
+Comanda: 44             
+------------------------------------------------
+Entregar na Mesa: 12                            
+------------------------------------------------
+IMP: 11/2 (BR)                                  
+At: 0 - Suporte                                 
+Term: 1                       Dt: 25/08/25 11:01
+================================================
+Qtde - Produto                                  
+------------------------------------------------
+1 - DEL VALLE MARACUJA                          
+------------------------------------------------
+                  Data Impressao: 25/08/25 11:01
+''',
+                                    ),
+                                  ]),
+                                );
+                                await flutterGetnetPaymentPlugin.print(printPayload: print);
+                                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Impressão realizada com sucesso!")));
+                                setState(() {});
+                              } on GetnetPrintException catch (e) {
+                                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.message)));
+                              } catch (e) {
+                                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erro desconhecido')));
+                              }
+                            },
                     style: ElevatedButton.styleFrom(backgroundColor: Colors.green, foregroundColor: Colors.white),
-                    child: Text('imprimir'),
+                    child: Text('Imprimir'),
                   ),
                 ),
               ),

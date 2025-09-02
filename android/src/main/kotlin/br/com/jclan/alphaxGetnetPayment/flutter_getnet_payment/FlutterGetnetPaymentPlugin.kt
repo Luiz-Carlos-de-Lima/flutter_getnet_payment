@@ -3,6 +3,8 @@ package br.com.jclan.alphaxGetnetPayment.flutter_getnet_payment
 import android.os.Bundle
 import android.app.Activity
 import android.content.Intent
+import android.os.Binder
+import android.os.IBinder
 
 import android.util.Log
 import io.flutter.embedding.engine.plugins.FlutterPlugin
@@ -22,6 +24,8 @@ import br.com.jclan.alphaxGetnetPayment.flutter_getnet_payment.deeplink.StatusDe
 import br.com.jclan.alphaxGetnetPayment.flutter_getnet_payment.services.DeviceInfo
 import br.com.jclan.alphaxGetnetPayment.flutter_getnet_payment.services.PrintService
 import com.getnet.posdigital.PosDigital
+import com.getnet.posdigital.printer.IPrinterCallback
+import com.getnet.posdigital.printer.PrinterStatus
 
 class FlutterGetnetPaymentPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
   private lateinit var channel : MethodChannel
@@ -153,15 +157,26 @@ class FlutterGetnetPaymentPlugin: FlutterPlugin, MethodCallHandler, ActivityAwar
       }
       "print" -> {
         val listPrintContent: List<HashMap<String, Any?>>? = call.argument<List<HashMap<String, Any?>>>("printable_content")
-        val bundleResult = PrintService().start(listPrintContent?.toBundleList())
 
-        if (bundleResult.getString("code") == "SUCCESS") {
-          val data: Map<String, Any?> = mapOf(
-            "code" to "SUCCESS",
-            "message" to bundleResult.getString("message")
-          )
-          resultScope?.success(data)
-        } else {
+        val bundleResult = PrintService().start(
+          PrinterCallback(
+            onCompleted = {
+              resultScope?.success(mapOf(
+                "code" to "SUCCESS",
+                "data" to true
+              ))
+              resultScope = null
+            },
+            onFailure = { message ->
+              resultScope?.error("ERROR", message, null)
+              resultScope = null
+            }
+          ),
+          listPrintContent?.toBundleList(),
+          binding!!
+        )
+
+        if (bundleResult.getString("code") == "ERROR") {
           val message: String = (bundleResult.getString("message") ?: "result error").toString()
           resultScope?.error((bundleResult.getString("code") ?: "ERROR").toString(), message, null)
           resultScope = null
@@ -257,4 +272,82 @@ class FlutterGetnetPaymentPlugin: FlutterPlugin, MethodCallHandler, ActivityAwar
         Log.d("Register PosDigital","PosDigital disconnected!")
       }
     }
+}
+
+class PrinterCallback(
+  private val onCompleted: () -> Unit,
+  private val onFailure: ( String) -> Unit
+) : IPrinterCallback {
+
+  override fun asBinder(): IBinder {
+    return Binder()
+  }
+
+  override fun onSuccess() {
+    onCompleted()
+  }
+
+  override fun onError(p0: Int) {
+    when(p0) {
+      PrinterStatus.ERROR_NOT_INIT -> {
+        onFailure("Impressora não iniciada")
+      }
+
+      PrinterStatus.ERROR_OVERHEAT -> {
+        onFailure("Impressora não iniciada")
+      }
+
+      PrinterStatus.ERROR_BUFOVERFLOW -> {
+        onFailure("Impressora superaquecida")
+      }
+
+      PrinterStatus.ERROR_PARAM -> {
+        onFailure("Fila de impressão muito grande")
+
+      }
+
+      PrinterStatus.ERROR_LIFTHEAD -> {
+        onFailure("Parâmetros incorretos")
+
+      }
+
+      PrinterStatus.ERROR_LOWTEMP -> {
+        onFailure("Porta da impressora aberta")
+
+      }
+
+      PrinterStatus.ERROR_LOWVOL -> {
+        onFailure("Temperatura baixa demais para impressão")
+
+      }
+
+      PrinterStatus.ERROR_MOTORERR -> {
+        onFailure("Sem bateria suficiente para impressão")
+
+      }
+
+      PrinterStatus.ERROR_NO_PAPER -> {
+        onFailure("Motor de passo com problemas")
+
+      }
+
+      PrinterStatus.ERROR_PAPERENDING -> {
+        onFailure("Sem bobina")
+
+      }
+
+      PrinterStatus.ERROR_PAPERJAM -> {
+        onFailure("Bobina acabando")
+
+      }
+
+      PrinterStatus.UNKNOW -> {
+        onFailure("Não foi possível definir o erro")
+
+      }
+      else -> {
+        onFailure("Impressora não iniciada")
+      }
+    }
+  }
 }
