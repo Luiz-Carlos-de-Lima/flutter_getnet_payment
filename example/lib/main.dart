@@ -578,7 +578,6 @@ class _PrintPageState extends State<_PrintPage> {
   GetnetPrintSize? _printSize;
   bool _ignoreLineBreak = false;
   String? _defaultImage64;
-  List<Map> _previewBase64 = [];
 
   final List<GetnetContentprint> _receiptContent = [];
 
@@ -780,28 +779,6 @@ class _PrintPageState extends State<_PrintPage> {
                         ),
                       ],
                     ),
-                  SizedBox(height: 20),
-                  if (_previewBase64.isNotEmpty) ...[
-                    Text("Pré-visualização:", style: TextStyle(fontWeight: FontWeight.bold)),
-                    SizedBox(height: 10),
-                    ...List.generate(_previewBase64.length, (index) {
-                      if (_previewBase64[index]['imageBase64'] is String && _previewBase64[index]['imageBase64'].isNotEmpty) {
-                        return Column(
-                          children: [
-                            if (_previewBase64[index]['messageError'] != null)
-                              Padding(
-                                padding: const EdgeInsets.symmetric(vertical: 10),
-                                child: Text(_previewBase64[index]['messageError'], style: TextStyle(color: Colors.red)),
-                              ),
-                            Padding(padding: const EdgeInsets.symmetric(vertical: 10), child: Image.memory(base64Decode(_previewBase64[index]['imageBase64']))),
-                          ],
-                        );
-                      }
-
-                      return SizedBox.shrink();
-                    }),
-                    SizedBox(height: 10),
-                  ],
                 ],
               ),
             ),
@@ -833,52 +810,7 @@ class _PrintPageState extends State<_PrintPage> {
                             ? null
                             : () async {
                               try {
-                                final print = GetnetPrintPayload(
-                                  printableContent: List<GetnetContentprint>.from([
-                                    GetnetContentprint(
-                                      type: GetnetPrintType.text,
-                                      align: GetnetPrintAlign.left,
-                                      size: GetnetPrintSize.small,
-                                      ignoreLineBreak: true,
-                                      content: '''                 JCLAN SISTEMAS                 
-------------------------------------------------
-          BAR           
-================================================
-Comanda: 44             
-------------------------------------------------
-Entregar na Mesa: 12                            
-------------------------------------------------
-IMP: 01/2 (BR)                                  
-At: 0 - Suporte                                 
-Term: 1                       Dt: 25/08/25 11:01
-================================================
-Qtde - Produto                                  
-------------------------------------------------
-1 - FANTA UVA                                   
-------------------------------------------------
-                  Data Impressao: 25/08/25 11:01
-                                                                 JCLAN SISTEMAS                 
-------------------------------------------------
-          BAR           
-================================================
-Comanda: 44             
-------------------------------------------------
-Entregar na Mesa: 12                            
-------------------------------------------------
-IMP: 11/2 (BR)                                  
-At: 0 - Suporte                                 
-Term: 1                       Dt: 25/08/25 11:01
-================================================
-Qtde - Produto                                  
-------------------------------------------------
-1 - DEL VALLE MARACUJA                          
-------------------------------------------------
-                  Data Impressao: 25/08/25 11:01
-''',
-                                    ),
-                                  ]),
-                                );
-                                await flutterGetnetPaymentPlugin.print(printPayload: print);
+                                await flutterGetnetPaymentPlugin.print(printPayload: GetnetPrintPayload(printableContent: _receiptContent));
                                 ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Impressão realizada com sucesso!")));
                                 setState(() {});
                               } on GetnetPrintException catch (e) {

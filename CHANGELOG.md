@@ -38,3 +38,14 @@
 
 # 1.1.8
 * fixed bugs
+
+# 1.1.9
+* Printing Improvement
+
+    - Replaced the line-by-line printing process with bitmap generation.
+
+    - Printing is now performed directly from the bitmap, ensuring better performance, consistent layout, and reduced errors.
+
+# 1.1.10
+
+* Reduced `compileSdk` requirement to improve compatibility with older projects.

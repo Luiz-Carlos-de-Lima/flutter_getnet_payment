@@ -30,7 +30,7 @@ apply plugin: "kotlin-android"
 android {
     namespace = "br.com.jclan.alphaxGetnetPayment.flutter_getnet_payment"
 
-    compileSdk = 36
+    compileSdk = 35
 
     signingConfigs {
         config {

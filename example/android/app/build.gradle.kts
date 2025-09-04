@@ -7,7 +7,7 @@ plugins {
 android {
     namespace = "br.com.jclan.alphaxGetnetPayment.flutter_getnet_payment_example"
     compileSdk = flutter.compileSdkVersion
-    ndkVersion = flutter.ndkVersion
+    ndkVersion = "27.0.12077973"
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
@@ -20,7 +20,7 @@ android {
 
     defaultConfig {
         applicationId = "br.com.jclan.alphaxGetnetPayment.flutter_getnet_payment_example"
-        minSdk = flutter.minSdkVersion           
+        minSdk = 22           
         targetSdk = 33        
         versionCode = 1       
         versionName = "1.0.0" 
