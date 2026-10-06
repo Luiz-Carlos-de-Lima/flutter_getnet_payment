@@ -47,30 +47,36 @@ class FlutterGetnetPaymentPlugin: FlutterPlugin, MethodCallHandler, ActivityAwar
     binding = newBinding
     connectPosDigitalService()
     binding?.addActivityResultListener { requestCode: Int, resultCode: Int, intent: Intent? ->
-      if(Activity.RESULT_OK == resultCode) {
-        var responseMap: Map<String, Any?> = mapOf()
-        when (requestCode) {
-            PaymentDeeplink.REQUEST_CODE -> {
-              responseMap = paymentDeeplink.validateIntent(intent)
-            }
-            StatusDeeplink.REQUEST_CODE -> {
-              responseMap = statusDeeplink.validateIntent(intent)
-            }
-            PreAuthorizationDeeplink.REQUEST_CODE -> {
-              responseMap = preAuthorizationDeeplink.validateIntent(intent)
-            }
-            RefundDeeplink.REQUEST_CODE -> {
-              responseMap = refundDeeplink.validateIntent(intent)
-            }
-            ReprintDeeplink.REQUEST_CODE -> {
-              responseMap = reprintDeeplink.validateIntent(intent)
-            }
-            InfoDeeplink.REQUEST_CODE -> {
-              responseMap = infoDeeplink.validateIntent(intent)
-            }
-        }
+      val knownRequest = requestCode == PaymentDeeplink.REQUEST_CODE ||
+        requestCode == StatusDeeplink.REQUEST_CODE ||
+        requestCode == PreAuthorizationDeeplink.REQUEST_CODE ||
+        requestCode == RefundDeeplink.REQUEST_CODE ||
+        requestCode == ReprintDeeplink.REQUEST_CODE ||
+        requestCode == InfoDeeplink.REQUEST_CODE
 
+      if (!knownRequest) {
+        return@addActivityResultListener false
+      }
+
+      if (Activity.RESULT_OK == resultCode) {
+        val responseMap: Map<String, Any?> = when (requestCode) {
+          PaymentDeeplink.REQUEST_CODE -> paymentDeeplink.validateIntent(intent)
+          StatusDeeplink.REQUEST_CODE -> statusDeeplink.validateIntent(intent)
+          PreAuthorizationDeeplink.REQUEST_CODE -> preAuthorizationDeeplink.validateIntent(intent)
+          RefundDeeplink.REQUEST_CODE -> refundDeeplink.validateIntent(intent)
+          ReprintDeeplink.REQUEST_CODE -> reprintDeeplink.validateIntent(intent)
+          InfoDeeplink.REQUEST_CODE -> infoDeeplink.validateIntent(intent)
+          else -> mapOf("code" to "ERROR", "message" to "Unknown request")
+        }
         sendResultData(responseMap)
+      } else {
+        // RESULT_CANCELED / outros: fecha o MethodChannel pra UI não ficar no await.
+        val message = when (resultCode) {
+          Activity.RESULT_CANCELED -> "Operação cancelada na maquininha."
+          else -> "Pagamento sem retorno da maquininha (resultCode=$resultCode)."
+        }
+        resultScope?.error("CANCELLED", message, null)
+        resultScope = null
       }
       true
     }
