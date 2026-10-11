@@ -51,17 +51,24 @@ class GetnetPaymentResponse {
     this.pixPayloadResponse,
   });
 
+  /// A Getnet devolve o valor como 12 dígitos em centavos (`000000001234` = R$ 12,34).
+  static double parseAmount(dynamic amount) {
+    if (amount is num) return amount.toDouble();
+    if (amount is String) return (int.tryParse(amount.trim()) ?? 0) / 100;
+    return 0.0;
+  }
+
   static GetnetPaymentResponse fromJson(Map map) {
     return GetnetPaymentResponse(
       result: map['result'],
       resultDetails: map['resultDetails'],
-      amount: int.parse(map['amount']) / 100,
-      callerId: map['callerId'],
+      amount: parseAmount(map['amount']),
+      callerId: map['callerId'] ?? '',
       nsu: map['nsu'],
       nsuLastSuccesfullMessage: map['nsuLastSuccesfullMessage'],
       cvNumber: map['cvNumber'],
       receiptAlreadyPrinted: map['receiptAlreadyPrinted'] ?? false,
-      type: map['type'],
+      type: map['type'] ?? '',
       brand: map['brand'],
       inputType: map['inputType'],
       installments: map['installments'],

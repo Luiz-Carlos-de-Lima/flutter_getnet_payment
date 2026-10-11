@@ -29,10 +29,17 @@ class MethodChannelFlutterGetnetPayment extends FlutterGetnetPaymentPlatform {
   @visibleForTesting
   final methodChannel = const MethodChannel('flutter_getnet_payment');
 
+  Map<String, String?> _details(PlatformException e) {
+    final details = e.details;
+    if (details is! Map) return {};
+    return details.map((key, value) => MapEntry(key.toString(), value?.toString()));
+  }
+
   @override
   Future<GetnetPaymentResponse> pay({required GetnetPaymentPayload paymentPayload}) async {
     try {
       final response = await methodChannel.invokeMethod<Map>('pay', paymentPayload.toJson());
+      if (kDebugMode && response?['data'] is Map) debugPrint('[Getnet] pay keys: ${(response!['data'] as Map).keys.toList()}');
       if (response is Map) {
         if ((response['code'] == GetnetStatusDeeplink.SUCCESS.name || response['code'] == GetnetStatusDeeplink.PENDING.name) && response['data'] is Map) {
           if (response['code'] == GetnetStatusDeeplink.SUCCESS.name) {
@@ -56,10 +63,17 @@ class MethodChannelFlutterGetnetPayment extends FlutterGetnetPaymentPlatform {
       } else {
         throw GetnetPaymentException(message: 'invalid response');
       }
-    } on GetnetPaymentException catch (e) {
-      throw GetnetPaymentException(message: e.message);
+    } on GetnetPaymentException {
+      rethrow;
     } on PlatformException catch (e) {
-      throw GetnetPaymentException(message: e.message ?? 'PlatformException');
+      final details = _details(e);
+      throw GetnetPaymentException(
+        message: e.message ?? 'PlatformException',
+        code: e.code,
+        result: details['result'],
+        resultDetails: details['resultDetails'],
+        stage: details['stage'],
+      );
     } catch (e) {
       throw GetnetPaymentException(message: "Pay Error: $e");
     }
@@ -69,6 +83,7 @@ class MethodChannelFlutterGetnetPayment extends FlutterGetnetPaymentPlatform {
   Future<GetnetStatusPaymentResponse> statusPayment({required GetnetStatusPaymentPayload statusPaymentPayload}) async {
     try {
       final response = await methodChannel.invokeMethod<Map>('statusPayment', statusPaymentPayload.toJson());
+      if (kDebugMode && response?['data'] is Map) debugPrint('[Getnet] checkstatus keys: ${(response!['data'] as Map).keys.toList()}');
       if (response is Map) {
         if ((response['code'] == GetnetStatusDeeplink.SUCCESS.name || response['code'] == GetnetStatusDeeplink.PENDING.name) && response['data'] is Map) {
           if (response['code'] == GetnetStatusDeeplink.SUCCESS.name) {
@@ -92,10 +107,17 @@ class MethodChannelFlutterGetnetPayment extends FlutterGetnetPaymentPlatform {
       } else {
         throw GetnetStatusPaymentException(message: 'invalid response');
       }
-    } on GetnetStatusPaymentException catch (e) {
-      throw GetnetStatusPaymentException(message: e.message);
+    } on GetnetStatusPaymentException {
+      rethrow;
     } on PlatformException catch (e) {
-      throw GetnetStatusPaymentException(message: e.message ?? 'PlatformException');
+      final details = _details(e);
+      throw GetnetStatusPaymentException(
+        message: e.message ?? 'PlatformException',
+        code: e.code,
+        result: details['result'],
+        resultDetails: details['resultDetails'],
+        stage: details['stage'],
+      );
     } catch (e) {
       throw GetnetStatusPaymentException(message: "Status payment Error: $e");
     }

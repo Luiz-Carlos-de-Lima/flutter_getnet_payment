@@ -32,27 +32,21 @@ class GetnetStatusPaymentResponse extends GetnetPaymentResponse {
   });
 
   static GetnetStatusPaymentResponse fromJson({required Map json}) {
-    bool refundData = false;
-    if (json['refunded'] is String) {
-      if (json['refunded'].toString().toLowerCase() == 'true') {
-        refundData = true;
-      } else {
-        refundData = false;
-      }
-    }
+    final refunded = json['refunded'];
+    final bool refundData = refunded is bool ? refunded : refunded?.toString().toLowerCase() == 'true';
 
     return GetnetStatusPaymentResponse(
       result: json['result'],
       resultDetails: json['resultDetails'],
-      amount: json['amount'] ?? 0.00,
-      callerId: json['callerId'] ?? 'this value of response is null',
-      nsu: json['nsu'] ?? 'this value of response is null',
+      amount: GetnetPaymentResponse.parseAmount(json['amount']),
+      callerId: json['callerId'] ?? '',
+      nsu: json['nsu'],
       nsuLastSuccesfullMessage: json['nsuLastSuccesfullMessage'],
       cvNumber: json['cvNumber'],
       receiptAlreadyPrinted: json['receiptAlreadyPrinted'] ?? false,
-      type: json['type'] ?? 'this value of response is null',
+      type: json['type'] ?? '',
       brand: json['brand'],
-      inputType: json['inputType'] ?? 'this value of response is null',
+      inputType: json['inputType'],
       installments: json['installments'],
       gmtDateTime: json['gmtDateTime'],
       nsuLocal: json['nsuLocal'],

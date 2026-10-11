@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_getnet_payment/constants/getnet_payment_type.dart';
 import 'package:flutter_getnet_payment/models/getnet_payment_payload.dart';
 import 'package:flutter_getnet_payment/models/getnet_payment_response.dart';
+import 'package:flutter_getnet_payment/models/getnet_status_payment_response.dart';
 
 void main() {
   group('GetnetPaymentPayload', () {
@@ -108,6 +109,36 @@ void main() {
       expect(restored.amount, 20);
       expect(restored.nsu, '999');
       expect(restored.orderId, 'ord');
+    });
+
+    test('fromJson aceita Pix sem type', () {
+      final response = GetnetPaymentResponse.fromJson({'result': '0', 'amount': '000000000100', 'callerId': 'c'});
+
+      expect(response.amount, 1);
+      expect(response.type, '');
+    });
+  });
+
+  group('GetnetStatusPaymentResponse', () {
+    test('fromJson converte amount em centavos e refunded booleano', () {
+      final response = GetnetStatusPaymentResponse.fromJson(json: {
+        'result': '0',
+        'amount': '000000001234',
+        'callerId': 'caller-1',
+        'refunded': true,
+      });
+
+      expect(response.amount, 12.34);
+      expect(response.refunded, isTrue);
+      expect(response.nsu, isNull);
+      expect(response.inputType, isNull);
+    });
+
+    test('fromJson aceita refunded como texto', () {
+      final response = GetnetStatusPaymentResponse.fromJson(json: {'result': '0', 'amount': '000000000500', 'refunded': 'false'});
+
+      expect(response.amount, 5);
+      expect(response.refunded, isFalse);
     });
   });
 }

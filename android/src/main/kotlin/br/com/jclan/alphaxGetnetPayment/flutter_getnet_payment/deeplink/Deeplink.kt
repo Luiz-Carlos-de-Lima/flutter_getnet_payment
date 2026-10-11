@@ -73,7 +73,9 @@ abstract class Deeplink {
 
                     return mapOf(
                         "code" to "ERROR",
-                        "message" to message
+                        "message" to message,
+                        "result" to status,
+                        "resultDetails" to resultDetail
                     )
                 }
             }

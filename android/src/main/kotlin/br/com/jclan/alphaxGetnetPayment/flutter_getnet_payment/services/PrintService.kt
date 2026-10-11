@@ -2,7 +2,6 @@ package br.com.jclan.alphaxGetnetPayment.flutter_getnet_payment.services
 
 import android.os.Bundle
 import com.getnet.posdigital.PosDigital
-import com.getnet.posdigital.PosDigitalRuntimeException
 import com.getnet.posdigital.printer.AlignMode
 import com.getnet.posdigital.printer.FontFormat
 import com.getnet.posdigital.printer.IPrinterService
@@ -15,6 +14,10 @@ import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
 
 
 class PrintService {
+    companion object {
+        const val PRINT_UNAVAILABLE_MESSAGE = "Falha na impressão. Tente novamente."
+    }
+
     private var printer: IPrinterService? = null
 
     fun start(
@@ -23,11 +26,11 @@ class PrintService {
         binding: ActivityPluginBinding
     ): Bundle {
         try {
-            if (PosDigital.getInstance().isInitiated){
+            if (PosDigital.getInstance().isInitiated()){
                 Worker.postToWorkerThread {
                     try {
                         validatePrintContent(printableContent)
-                        printer =  PosDigital.getInstance().printer
+                        printer =  PosDigital.getInstance().getPrinter()
                         printer!!.init()
 
                         val bitmap: Bitmap = GenerateBitmap()
@@ -58,12 +61,7 @@ class PrintService {
             } else {
                 return Bundle().apply {
                     putString("code", "ERROR")
-                    putString("message", "Instance of PosDigital not initialized") }
-            }
-        } catch (e: PosDigitalRuntimeException) {
-            return Bundle().apply {
-                putString("code", "ERROR")
-                putString("message", e.message)
+                    putString("message", PRINT_UNAVAILABLE_MESSAGE) }
             }
         } catch (e: IllegalArgumentException) {
             return Bundle().apply {

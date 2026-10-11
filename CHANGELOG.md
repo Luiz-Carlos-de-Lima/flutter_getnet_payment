@@ -49,3 +49,10 @@
 # 1.1.10
 
 * Reduced `compileSdk` requirement to improve compatibility with older projects.
+
+# 1.1.11
+* PosDigital is now registered/unregistered with the applicationContext in the engine lifecycle (no longer tied to the Activity).
+* Activity result listener is removed on detach; binding is always cleared.
+* PosDigital reconnection on `onError` limited to 3 attempts.
+* Removed `binding!!` usages; friendly message when the Activity is unavailable (code `UNAVAILABLE`, stage `start` kept).
+* Print: reconnects PosDigital and returns a friendly message when the service is not initiated; fixed shifted printer error messages.
