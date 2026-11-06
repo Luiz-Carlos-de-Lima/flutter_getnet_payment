@@ -110,7 +110,7 @@ class GenerateBitmap {
                 val g = Color.green(pixel)
                 val b = Color.blue(pixel)
                 val gray = (0.299 * r + 0.587 * g + 0.114 * b).toInt()
-                val color = if (gray < 128) Color.BLACK else Color.WHITE
+                val color = if (gray < BLACK_THRESHOLD) Color.BLACK else Color.WHITE
                 paint.color = color
                 canvas.drawPoint(x.toFloat(), y.toFloat(), paint)
             }
@@ -145,8 +145,9 @@ class GenerateBitmap {
         val fontSize = when (size) {
             "big" -> 20f
             "medium" -> 18f
-            "small" -> 14f
-            else -> 14f
+            // JetBrainsMono: largura = 0,6 x tamanho; 48 colunas x 7,98 px = 383 px (papel 384 px).
+            "small" -> 13.3f
+            else -> 13.3f
         }
 
         val paint = Paint().apply {
@@ -154,6 +155,10 @@ class GenerateBitmap {
             textSize = fontSize
             typeface = Typeface.createFromAsset(context.assets, "fonts/JetBrainsMono-Bold.ttf")
             isAntiAlias = true
+            if (TEXT_STROKE_WIDTH > 0f) {
+                style = Paint.Style.FILL_AND_STROKE
+                strokeWidth = TEXT_STROKE_WIDTH
+            }
         }
 
         val lines = if (content.isEmpty()) listOf(" ")
@@ -202,5 +207,12 @@ class GenerateBitmap {
             start = end
         }
         return result
+    }
+
+    companion object {
+        // Pixels mais claros que isto viram branco; valor maior = traço mais grosso.
+        private const val BLACK_THRESHOLD = 190
+        // Engrossa o contorno da letra; 0f desliga. Subir para 0.5f se ainda ficar fraco.
+        private const val TEXT_STROKE_WIDTH = 0f
     }
 }
